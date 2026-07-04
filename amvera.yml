@@ -3,3 +3,4 @@ meta:
 
 run:
   containerPort: 8000
+  persistenceMount: /data
