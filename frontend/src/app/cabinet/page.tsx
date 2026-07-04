@@ -1,0 +1,115 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { BookOpen, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import api from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
+import type { Enrollment } from "@/lib/types";
+
+export default function CabinetPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    api
+      .get<Enrollment[]>("/enrollments/me")
+      .then((res) => setEnrollments(res.data))
+      .finally(() => setLoading(false));
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || loading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Личный кабинет</h1>
+        <p className="text-muted-foreground mb-10">
+          Добро пожаловать, {user?.full_name}
+        </p>
+      </motion.div>
+
+      <h2 className="text-xl font-semibold mb-6">Мои курсы</h2>
+
+      {enrollments.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {enrollments.map((enrollment, i) => (
+            <motion.div
+              key={enrollment.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Card className="p-0 overflow-hidden h-full">
+                <div className="relative h-40">
+                  {enrollment.course_image_url ? (
+                    <Image
+                      src={enrollment.course_image_url}
+                      alt={enrollment.course_title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-copper-900/40 to-purple-900/20" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                </div>
+                <CardContent className="p-5 space-y-4">
+                  <h3 className="font-semibold text-lg">{enrollment.course_title}</h3>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <BookOpen className="h-4 w-4" />
+                      {enrollment.completed_lessons}/{enrollment.lessons_count} уроков
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Прогресс</span>
+                      <span className="text-copper-400">{enrollment.progress_percent.toFixed(0)}%</span>
+                    </div>
+                    <Progress value={enrollment.progress_percent} />
+                  </div>
+                  <Link href={`/learn/${enrollment.course_id}`}>
+                    <Button className="w-full">
+                      <Play className="h-4 w-4" />
+                      Продолжить
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <Card className="text-center py-16">
+          <CardContent>
+            <p className="text-muted-foreground mb-4">У вас пока нет курсов</p>
+            <Link href="/courses">
+              <Button>Выбрать курс</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

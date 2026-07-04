@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 1%;
+    --foreground: 35 20% 95%;
+    --card: 0 0% 4%;
+    --card-foreground: 35 20% 95%;
+    --primary: 30 58% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 7%;
+    --secondary-foreground: 35 20% 95%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 30 8% 55%;
+    --accent: 30 58% 45%;
+    --accent-foreground: 0 0% 100%;
+    --border: 30 10% 12%;
+    --input: 30 10% 12%;
+    --ring: 30 58% 50%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-[#030303] text-foreground antialiased;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .glass-hover {
+    @apply transition-all duration-300 hover:bg-white/[0.06] hover:border-copper-500/30 hover:shadow-lg hover:shadow-copper-900/20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-copper-400 via-copper-300 to-amber-200 bg-clip-text text-transparent;
+  }
+
+  .premium-card {
+    @apply glass rounded-2xl p-6 glass-hover;
+  }
+
+  .copper-glow {
+    box-shadow: 0 0 40px rgba(205, 127, 50, 0.15);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(205, 127, 50, 0.4);
+}

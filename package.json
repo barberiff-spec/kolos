@@ -1,0 +1,17 @@
+{
+  "name": "kolos",
+  "version": "1.0.0",
+  "description": "Премиальная LMS-платформа для обучения барберов с полным набором функций для продакшена.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@railway/cli": "^5.23.3",
+    "vercel": "^54.20.1"
+  }
+}
