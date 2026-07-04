@@ -2,6 +2,16 @@
 
 Премиальная LMS-платформа для обучения барберов с полным набором функций для продакшена.
 
+## 🌐 Live (сейчас)
+
+| | URL |
+|---|-----|
+| **Сайт** | https://frontend-blond-one-25.vercel.app |
+| **API** | через туннель с Mac (пока Mac включён) |
+| **Админка** | `/admin` → admin@kolos.bar / admin123 |
+
+Постоянный backend без Mac: [DEPLOY-GITHUB.md](./DEPLOY-GITHUB.md) (GitHub + Render).
+
 ## Возможности v2.0
 
 | Модуль | Описание |
