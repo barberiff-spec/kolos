@@ -97,10 +97,15 @@ Webhook URL: `https://your-api.com/api/v1/payments/webhook/yookassa`
 
 ## Production
 
-См. [LAUNCH.md](./LAUNCH.md) — Docker prod, env-файлы, чеклист запуска.
+| Инструкция | Для кого |
+|------------|----------|
+| **[DEPLOY-RU.md](./DEPLOY-RU.md)** | **Россия — Timeweb, Amvera, ЮKassa** |
+| [DEPLOY-GITHUB.md](./DEPLOY-GITHUB.md) | Render / Vercel (зарубеж) |
+| [LAUNCH.md](./LAUNCH.md) | Docker prod, чеклист |
 
 ```bash
-./scripts/start.sh prod
+./scripts/start.sh prod          # VPS / Timeweb — всё в одном
+./scripts/timeweb-backend-only.sh # только API, frontend на Vercel
 ```
 
 ## Email (SMTP)

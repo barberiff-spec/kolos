@@ -1,0 +1,16 @@
+meta:
+  environment: python
+  toolchain:
+    name: docker
+    version: latest
+
+build:
+  dockerfile: deploy/Dockerfile
+  skip: false
+
+run:
+  containerPort: 8000
+  persistenceMount: /data
+
+service:
+  type: http
