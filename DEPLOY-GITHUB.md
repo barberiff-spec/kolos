@@ -2,6 +2,18 @@
 
 Git работает — это самый надёжный путь. **Railway CLI не нужен**: всё через сайты Railway и Vercel.
 
+**Сайт уже live:** https://frontend-blond-one-25.vercel.app  
+**Backend сейчас:** через туннель с Mac (временно). Для постоянного — шаги ниже.
+
+---
+
+## Вариант A: Render (1 клик после push на GitHub)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/barberiff-spec/kolos)
+
+После деплоя Render даст URL вида `https://kolos-api.onrender.com`.  
+Обновите на Vercel переменную `NEXT_PUBLIC_API_URL` = `https://kolos-api.onrender.com/api/v1`
+
 ---
 
 ## Шаг 1. GitHub-репозиторий
