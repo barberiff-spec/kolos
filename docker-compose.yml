@@ -27,7 +27,8 @@ services:
       DATABASE_URL: postgresql+psycopg2://kolos:kolos_secret@db:5432/kolos_lms
       SECRET_KEY: dev-secret-change-in-production
       DEBUG: "true"
-      CORS_ORIGINS: http://localhost:3001
+      CORS_ORIGINS: http://localhost:3001,https://frontend-blond-one-25.vercel.app
+      FRONTEND_URL: https://frontend-blond-one-25.vercel.app
     depends_on:
       db:
         condition: service_healthy
