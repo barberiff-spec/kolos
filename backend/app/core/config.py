@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:3001"
 
+    upload_dir: str = "uploads"
+
     # Email (optional — logs to console if not configured)
     smtp_host: str | None = None
     smtp_port: int = 587

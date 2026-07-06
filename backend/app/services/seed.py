@@ -204,7 +204,7 @@ def seed_database() -> None:
                 ),
                 "short_description": "Старт карьеры барбера с нуля",
                 "price": 12990.0,
-                "image_url": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800",
+                "image_url": "/courses/basics.jpg",
                 "modules": [
                     {
                         "title": "Введение в профессию",
@@ -250,7 +250,7 @@ def seed_database() -> None:
                 ),
                 "short_description": "Фейд, переходы и классика — от основ до мастерства",
                 "price": 19990.0,
-                "image_url": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=800",
+                "image_url": "/courses/fade-classic.jpg",
                 "modules": [
                     {
                         "title": "Фейд — техника и инструменты",
@@ -294,7 +294,7 @@ def seed_database() -> None:
                 ),
                 "short_description": "Бритьё с горячими полотенцами и уход за бородой",
                 "price": 16990.0,
-                "image_url": "https://images.unsplash.com/photo-1622286342621-4bd786c24470?w=800",
+                "image_url": "/courses/shave-beard.jpg",
                 "modules": [
                     {
                         "title": "Опасное бритьё",
@@ -340,7 +340,7 @@ def seed_database() -> None:
                 ),
                 "short_description": "Профессиональный набор и укладка",
                 "price": 9990.0,
-                "image_url": "https://images.unsplash.com/photo-1503956548150-b085cc8b9f91?w=800",
+                "image_url": "/courses/tools-styling.jpg",
                 "modules": [
                     {
                         "title": "Инструменты",

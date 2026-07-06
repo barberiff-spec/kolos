@@ -4,15 +4,105 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Edit, Plus, Tag, Trash2, Users } from "lucide-react";
+import { Edit, ImagePlus, Plus, Tag, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import api from "@/lib/api";
+import api, { getAccessToken } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import type { CourseListItem, PromoCode, User } from "@/lib/types";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+
+async function uploadCourseImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const token = getAccessToken();
+  const res = await fetch(`${API_URL}/uploads/course-image`, {
+    method: "POST",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.detail || "Не удалось загрузить изображение");
+  }
+  const data = await res.json();
+  return data.url as string;
+}
+
+type CourseFormState = {
+  title: string;
+  description: string;
+  short_description: string;
+  price: string;
+  image_url: string;
+};
+
+const emptyCourseForm: CourseFormState = {
+  title: "",
+  description: "",
+  short_description: "",
+  price: "0",
+  image_url: "",
+};
+
+function CourseImageField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    setUploading(true);
+    try {
+      const url = await uploadCourseImage(file);
+      onChange(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ошибка загрузки");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <Label>Обложка курса</Label>
+      <div className="flex items-center gap-3">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://... или загрузите файл →"
+        />
+        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10">
+          <ImagePlus className="h-4 w-4" />
+          {uploading ? "Загрузка..." : "Файл"}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+        </label>
+      </div>
+      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {value && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={value} alt="Превью обложки" className="mt-3 h-32 w-full rounded-xl object-cover" />
+      )}
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const router = useRouter();
@@ -22,13 +112,9 @@ export default function AdminPage() {
   const [promos, setPromos] = useState<PromoCode[]>([]);
   const [tab, setTab] = useState<"courses" | "users" | "promos">("courses");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    short_description: "",
-    price: "0",
-    image_url: "",
-  });
+  const [form, setForm] = useState<CourseFormState>(emptyCourseForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<CourseFormState>(emptyCourseForm);
   const [promoForm, setPromoForm] = useState({ code: "", discount_percent: "10", discount_amount: "0" });
 
   useEffect(() => {
@@ -61,7 +147,7 @@ export default function AdminPage() {
       image_url: form.image_url || null,
       is_published: true,
     });
-    setForm({ title: "", description: "", short_description: "", price: "0", image_url: "" });
+    setForm(emptyCourseForm);
     setShowForm(false);
     loadData();
   };
@@ -69,6 +155,33 @@ export default function AdminPage() {
   const deleteCourse = async (id: number) => {
     if (!confirm("Удалить курс?")) return;
     await api.delete(`/courses/${id}`);
+    loadData();
+  };
+
+  const startEditCourse = (course: CourseListItem) => {
+    setEditingId(course.id);
+    setEditForm({
+      title: course.title,
+      description: "",
+      short_description: course.short_description || "",
+      price: String(course.price),
+      image_url: course.image_url || "",
+    });
+    api.get(`/courses/${course.id}`).then(({ data }) => {
+      setEditForm((prev) => ({ ...prev, description: data.description || "" }));
+    });
+  };
+
+  const saveEditCourse = async (e: React.FormEvent, id: number) => {
+    e.preventDefault();
+    await api.patch(`/courses/${id}`, {
+      title: editForm.title,
+      description: editForm.description,
+      short_description: editForm.short_description,
+      price: parseFloat(editForm.price),
+      image_url: editForm.image_url || null,
+    });
+    setEditingId(null);
     loadData();
   };
 
@@ -174,15 +287,10 @@ export default function AdminPage() {
                       required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="image">URL обложки</Label>
-                    <Input
-                      id="image"
-                      value={form.image_url}
-                      onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-                      placeholder="https://images.unsplash.com/..."
-                    />
-                  </div>
+                  <CourseImageField
+                    value={form.image_url}
+                    onChange={(url) => setForm({ ...form, image_url: url })}
+                  />
                   <Button type="submit">Создать</Button>
                 </form>
               </CardContent>
@@ -191,28 +299,90 @@ export default function AdminPage() {
 
           <div className="space-y-3">
             {courses.map((course) => (
-              <Card key={course.id} className="flex items-center justify-between p-4">
-                <div>
-                  <h3 className="font-medium">{course.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {formatPrice(course.price)} · {course.lessons_count} уроков ·{" "}
-                    {course.is_published ? "Опубликован" : "Черновик"}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Link href={`/admin/courses/${course.id}`}>
-                    <Button variant="secondary" size="sm">
+              <Card key={course.id} className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {course.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={course.image_url}
+                        alt={course.title}
+                        className="h-12 w-16 shrink-0 rounded-lg object-cover"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <h3 className="font-medium truncate">{course.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {formatPrice(course.price)} · {course.lessons_count} уроков ·{" "}
+                        {course.is_published ? "Опубликован" : "Черновик"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => (editingId === course.id ? setEditingId(null) : startEditCourse(course))}
+                    >
                       <Edit className="h-4 w-4" />
-                      Уроки
+                      {editingId === course.id ? "Закрыть" : "Изменить"}
                     </Button>
-                  </Link>
-                  <Button variant="secondary" size="sm" onClick={() => togglePublish(course)}>
-                    {course.is_published ? "Скрыть" : "Опубликовать"}
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={() => deleteCourse(course.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <Link href={`/admin/courses/${course.id}`}>
+                      <Button variant="secondary" size="sm">
+                        Уроки
+                      </Button>
+                    </Link>
+                    <Button variant="secondary" size="sm" onClick={() => togglePublish(course)}>
+                      {course.is_published ? "Скрыть" : "Опубликовать"}
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => deleteCourse(course.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+
+                {editingId === course.id && (
+                  <form onSubmit={(e) => saveEditCourse(e, course.id)} className="mt-4 space-y-4 border-t border-white/10 pt-4">
+                    <div>
+                      <Label>Название</Label>
+                      <Input
+                        value={editForm.title}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Краткое описание</Label>
+                      <Input
+                        value={editForm.short_description}
+                        onChange={(e) => setEditForm({ ...editForm, short_description: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Описание</Label>
+                      <textarea
+                        className="flex min-h-[100px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/50"
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>Цена (₽)</Label>
+                      <Input
+                        type="number"
+                        value={editForm.price}
+                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <CourseImageField
+                      value={editForm.image_url}
+                      onChange={(url) => setEditForm({ ...editForm, image_url: url })}
+                    />
+                    <Button type="submit">Сохранить изменения</Button>
+                  </form>
+                )}
               </Card>
             ))}
           </div>
