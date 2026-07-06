@@ -109,6 +109,26 @@ def _patch_existing_content(db: Session) -> None:
     db.flush()
 
 
+def _patch_course_images(db: Session) -> None:
+    """Заменяет битые Unsplash-ссылки на локальные обложки с фронтенда."""
+    image_by_title = {
+        "Основы барберинга": "/courses/basics.jpg",
+        "Мужские стрижки": "/courses/fade-classic.jpg",
+        "Бритьё": "/courses/shave-beard.jpg",
+        "Инструменты": "/courses/tools-styling.jpg",
+    }
+
+    for course in db.query(Course).all():
+        if not course.image_url or "unsplash.com" not in course.image_url:
+            continue
+        for marker, url in image_by_title.items():
+            if marker in course.title:
+                course.image_url = url
+                break
+
+    db.flush()
+
+
 def seed_database() -> None:
     Base.metadata.create_all(bind=engine)
 
@@ -175,6 +195,7 @@ def seed_database() -> None:
             _patch_existing_content(db)
 
         _patch_existing_courses(db)
+        _patch_course_images(db)
 
         if db.query(User).first():
             db.commit()
