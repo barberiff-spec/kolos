@@ -106,36 +106,46 @@ systemctl reload caddy
 ## Вариант B — Amvera (без VPS, через git push)
 
 Российский PaaS: [amvera.ru](https://amvera.ru) — как Heroku, оплата в рублях.
+В репозитории уже всё подготовлено: `amvera.yml` + `deploy/Dockerfile` в корне,
+backend стартует на SQLite (файл в `/data`, том сохраняется между деплоями) —
+**платный PostgreSQL не нужен**, схема и демо-курсы создаются автоматически при
+первом запуске.
 
-### Шаг 1. PostgreSQL на Amvera
+### Шаг 1. Зарегистрируйтесь и создайте приложение
 
-1. Личный кабинет → **Создать** → **PostgreSQL**
-2. Дождитесь статуса «PostgreSQL запущен»
-3. На вкладке **Инфо** скопируйте: хост, пользователь, пароль, имя БД
+1. [amvera.ru](https://amvera.ru) → регистрация (email или через Git-провайдера)
+2. Личный кабинет → **Создать** → **Приложение** → тип **Git** → имя `kolos-api`
+3. Amvera покажет git-адрес вида `https://git.amvera.ru/ВАШ-ЛОГИН/kolos-api` — скопируйте его
 
-### Шаг 2. Backend на Amvera
+### Шаг 2. Отправьте код
 
-1. **Создать** → **Приложение** → имя `kolos-api`
-2. Привязать GitHub `barberiff-spec/kolos` **или** push через git Amvera:
+Из корня проекта (это пушит весь репозиторий — Amvera сам найдёт
+`deploy/Dockerfile` и `amvera.yml`):
 
 ```bash
 cd ~/Projects/kolos
-git remote add amvera https://git.amvera.ru/ВАШ-ЛОГИН/kolos-api
-git subtree push --prefix backend amvera main
+./scripts/amvera-push.sh ВАШ-ЛОГИН
 ```
 
-3. В проекте укажите **Dockerfile** = `backend/Dockerfile.prod`
-4. Переменные окружения:
+### Шаг 3. Переменные окружения
+
+В панели Amvera → проект `kolos-api` → **Переменные**:
 
 ```
-SECRET_KEY=случайная-строка
-DATABASE_URL=postgresql+psycopg2://USER:PASS@HOST:5432/kolos_lms
+SECRET_KEY=случайная-строка-минимум-32-символа
+DATABASE_URL=sqlite:////data/kolos.db
 DEBUG=false
 CORS_ORIGINS=https://frontend-blond-one-25.vercel.app
 FRONTEND_URL=https://frontend-blond-one-25.vercel.app
 ```
 
-5. Получите URL вида `https://kolos-api-xxx.amvera.io`
+Сохраните — Amvera пересоберёт и перезапустит приложение.
+Получите URL вида `https://kolos-api-xxx.amvera.io`, проверьте
+`https://kolos-api-xxx.amvera.io/health`.
+
+> Захотите перейти на PostgreSQL позже — просто создайте **PostgreSQL** в
+> личном кабинете и замените `DATABASE_URL` на
+> `postgresql+psycopg2://USER:PASS@HOST:5432/kolos_lms`.
 
 ### Шаг 3. Обновить frontend (Vercel)
 
