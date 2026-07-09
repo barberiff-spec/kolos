@@ -34,7 +34,7 @@ export default async function CoursesPage() {
         <div className="premium-card text-center py-16">
           <p className="text-muted-foreground text-lg">Курсы пока не добавлены</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Убедитесь, что backend запущен на порту 8001
+            Загляните позже — каталог скоро пополнится
           </p>
         </div>
       )}

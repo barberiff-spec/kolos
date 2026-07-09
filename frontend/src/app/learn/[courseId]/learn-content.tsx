@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -94,13 +93,21 @@ export default function LearnContent() {
     );
   }
 
-  if (!course || !activeLesson) return null;
+  if (!course) return null;
+
+  if (!activeLesson) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
+        В этом курсе пока нет уроков
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <aside
         className={cn(
-          "border-r border-white/5 bg-black/40 backdrop-blur-xl transition-all duration-300 overflow-y-auto",
+          "border-r border-white/5 bg-[#0a0a0a]/95 md:bg-black/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",
           sidebarOpen ? "w-80" : "w-0"
         )}
       >
@@ -150,19 +157,14 @@ export default function LearnContent() {
       </aside>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/5 bg-background/80 backdrop-blur-xl px-4 py-3">
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/5 bg-[#0a0a0a]/95 md:bg-background/80 md:backdrop-blur-xl px-4 py-3">
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <h1 className="font-medium truncate flex-1">{activeLesson.title}</h1>
         </div>
 
-        <motion.div
-          key={activeLesson.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto p-6 space-y-8"
-        >
+        <div key={activeLesson.id} className="max-w-4xl mx-auto p-6 space-y-8">
           <VideoPlayer
             videoUrl={activeLesson.video_url}
             videoType={activeLesson.video_type}
@@ -207,7 +209,7 @@ export default function LearnContent() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

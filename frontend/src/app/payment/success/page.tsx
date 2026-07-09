@@ -44,7 +44,13 @@ function SuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
+          Загрузка…
+        </div>
+      }
+    >
       <SuccessContent />
     </Suspense>
   );

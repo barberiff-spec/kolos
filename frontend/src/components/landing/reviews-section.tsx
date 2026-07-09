@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import type { Review } from "@/lib/types";
 
@@ -14,15 +13,8 @@ export function ReviewsSection({ reviews }: { reviews: Review[] }) {
         <p className="text-muted-foreground">Те, кто уже прошёл KOLOS</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {reviews.map((review, i) => (
-          <motion.div
-            key={review.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="premium-card border-copper-500/10"
-          >
+        {reviews.map((review) => (
+          <div key={review.id} className="premium-card border-copper-500/10">
             <div className="flex gap-1 mb-4">
               {Array.from({ length: review.rating }).map((_, j) => (
                 <Star key={j} className="h-4 w-4 fill-copper-500 text-copper-500" />
@@ -35,7 +27,7 @@ export function ReviewsSection({ reviews }: { reviews: Review[] }) {
                 <p className="text-xs text-muted-foreground mt-0.5">{review.author_role}</p>
               )}
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

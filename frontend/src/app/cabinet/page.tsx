@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { BookOpen, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,24 +41,19 @@ export default function CabinetPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Личный кабинет</h1>
         <p className="text-muted-foreground mb-10">
           Добро пожаловать, {user?.full_name}
         </p>
-      </motion.div>
+      </div>
 
       <h2 className="text-xl font-semibold mb-6">Мои курсы</h2>
 
       {enrollments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {enrollments.map((enrollment, i) => (
-            <motion.div
-              key={enrollment.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
+            <div key={enrollment.id}>
               <Card className="p-0 overflow-hidden h-full">
                 <div className="relative h-40">
                   {enrollment.course_image_url ? (
@@ -97,7 +91,7 @@ export default function CabinetPage() {
                   </Link>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : (

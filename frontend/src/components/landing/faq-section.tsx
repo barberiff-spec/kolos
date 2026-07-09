@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FAQ } from "@/lib/types";
@@ -18,31 +17,28 @@ export function FAQSection({ faqs }: { faqs: FAQ[] }) {
         <p className="text-muted-foreground">Всё, что нужно знать перед стартом</p>
       </div>
       <div className="max-w-2xl mx-auto space-y-3">
-        {faqs.map((faq) => (
-          <div key={faq.id} className="premium-card p-0 overflow-hidden border-copper-500/10">
-            <button
-              className="w-full flex items-center justify-between p-5 text-left"
-              onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
-            >
-              <span className="font-medium pr-4">{faq.question}</span>
-              <ChevronDown
-                className={cn("h-5 w-5 text-copper-500 shrink-0 transition-transform", openId === faq.id && "rotate-180")}
-              />
-            </button>
-            <AnimatePresence>
-              {openId === faq.id && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <p className="px-5 pb-5 text-muted-foreground leading-relaxed">{faq.answer}</p>
-                </motion.div>
+        {faqs.map((faq) => {
+          const open = openId === faq.id;
+          return (
+            <div key={faq.id} className="premium-card p-0 overflow-hidden border-copper-500/10">
+              <button
+                className="w-full flex items-center justify-between p-5 text-left"
+                onClick={() => setOpenId(open ? null : faq.id)}
+              >
+                <span className="font-medium pr-4">{faq.question}</span>
+                <ChevronDown
+                  className={cn(
+                    "h-5 w-5 text-copper-500 shrink-0 transition-transform",
+                    open && "rotate-180"
+                  )}
+                />
+              </button>
+              {open && (
+                <p className="px-5 pb-5 text-muted-foreground leading-relaxed">{faq.answer}</p>
               )}
-            </AnimatePresence>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

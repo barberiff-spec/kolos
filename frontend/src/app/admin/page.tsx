@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Edit, ImagePlus, Plus, Tag, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,7 @@ import { formatPrice } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import type { CourseListItem, PromoCode, User } from "@/lib/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+import { API_URL } from "@/lib/api-config";
 
 async function uploadCourseImage(file: File): Promise<string> {
   const formData = new FormData();
@@ -217,10 +216,10 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Админ-панель KOLOS</h1>
         <p className="text-muted-foreground mb-8">Управление курсами и учениками</p>
-      </motion.div>
+      </div>
 
       <div className="flex gap-2 mb-8">
         <Button variant={tab === "courses" ? "default" : "secondary"} onClick={() => setTab("courses")}>

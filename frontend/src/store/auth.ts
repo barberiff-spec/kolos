@@ -23,7 +23,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchUser: async () => {
     try {
       set({ isLoading: true });
-      const { data } = await api.get<User>("/auth/me");
+      // Prefer refresh first when we have no in-memory session yet —
+      // cookies may work after SameSite=None fix; Bearer is restored from sessionStorage.
+      const { data } = await api.get<User>("/auth/me", { timeout: 10000 });
       set({ user: data, isAuthenticated: true, isLoading: false });
     } catch {
       setAccessToken(null);
@@ -34,7 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email, password) => {
     const { data } = await api.post<AuthResponse>("/auth/login", { email, password });
     setAccessToken(data.access_token);
-    set({ user: data.user, isAuthenticated: true });
+    set({ user: data.user, isAuthenticated: true, isLoading: false });
   },
 
   register: async (email, password, fullName) => {
@@ -44,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       full_name: fullName,
     });
     setAccessToken(data.access_token);
-    set({ user: data.user, isAuthenticated: true });
+    set({ user: data.user, isAuthenticated: true, isLoading: false });
   },
 
   logout: async () => {
@@ -52,7 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post("/auth/logout");
     } finally {
       setAccessToken(null);
-      set({ user: null, isAuthenticated: false });
+      set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },
 }));

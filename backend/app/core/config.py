@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Annotated, List
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -57,12 +57,48 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url(cls, value: str) -> str:
-        # Railway/Heroku отдают postgres:// — SQLAlchemy + psycopg2 требует postgresql+psycopg2://
         if value.startswith("postgres://"):
             return value.replace("postgres://", "postgresql+psycopg2://", 1)
         if value.startswith("postgresql://"):
             return value.replace("postgresql://", "postgresql+psycopg2://", 1)
         return value
+
+    @model_validator(mode="after")
+    def apply_production_defaults(self) -> "Settings":
+        production_origins = [
+            "https://kolos-academy.ru",
+            "https://www.kolos-academy.ru",
+            "https://kolos-academy.vercel.app",
+            "https://kolos-barberiff-spec.vercel.app",
+            "https://frontend-barberiff-spec.vercel.app",
+            "https://frontend-blond-one-25.vercel.app",
+        ]
+        merged = list(self.cors_origins)
+        for origin in production_origins:
+            if origin not in merged:
+                merged.append(origin)
+        object.__setattr__(self, "cors_origins", merged)
+
+        # Frontend and API are on different hosts → cookies must be SameSite=None; Secure
+        # or browsers will not send them on XHR/fetch from kolos-academy.ru to amvera.io.
+        cross_site = any(
+            "kolos-academy.ru" in o or "vercel.app" in o for o in merged
+        )
+        if cross_site and not self.debug:
+            object.__setattr__(self, "cookie_secure", True)
+            if self.cookie_samesite.lower() != "none":
+                object.__setattr__(self, "cookie_samesite", "none")
+            # API host cannot set Cookie Domain for the frontend domain.
+            if self.cookie_domain and "amvera" not in self.cookie_domain:
+                object.__setattr__(self, "cookie_domain", None)
+
+        if (
+            not self.debug
+            and self.frontend_url.startswith("http://localhost")
+        ):
+            object.__setattr__(self, "frontend_url", "https://kolos-academy.ru")
+
+        return self
 
     @property
     def yookassa_enabled(self) -> bool:

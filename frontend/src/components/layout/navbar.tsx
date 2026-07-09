@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { Award, BookOpen, LayoutDashboard, LogIn, LogOut, Menu, Scissors, User, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -84,17 +83,18 @@ export function Navbar() {
           )}
         </div>
 
-        <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button
+          type="button"
+          className="md:hidden p-2"
+          aria-label="Меню"
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
       {mobileOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden border-t border-copper-500/10 p-4 space-y-2"
-        >
+        <div className="md:hidden border-t border-copper-500/10 p-4 space-y-2">
           {visibleLinks.map((link) => (
             <Link
               key={link.href}
@@ -106,7 +106,26 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-        </motion.div>
+          {!isAuthenticated && (
+            <>
+              <Link
+                href="/auth/login?mode=register"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm hover:bg-white/5"
+              >
+                Регистрация
+              </Link>
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-4 py-3 text-sm hover:bg-white/5"
+              >
+                <LogIn className="h-4 w-4" />
+                Войти
+              </Link>
+            </>
+          )}
+        </div>
       )}
     </header>
   );

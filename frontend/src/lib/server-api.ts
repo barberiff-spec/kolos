@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+import { API_URL } from "@/lib/api-config";
 
 export async function serverFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { BookOpen, CheckCircle2, Lock, Play, ShoppingCart, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CheckoutTrust } from "@/components/checkout/checkout-trust";
@@ -52,15 +51,20 @@ export default function CoursePage() {
         }
       })
       .catch(() => {
-        setPaymentMethods([
-          {
-            id: "mock",
-            title: "Тестовая оплата",
-            description: "Мгновенный доступ (режим разработки)",
-            icon: "zap",
-          },
-        ]);
-        setPaymentMethod("mock");
+        // Never fall back to mock payments in production.
+        if (process.env.NODE_ENV !== "production") {
+          setPaymentMethods([
+            {
+              id: "mock",
+              title: "Тестовая оплата",
+              description: "Мгновенный доступ (режим разработки)",
+              icon: "zap",
+            },
+          ]);
+          setPaymentMethod("mock");
+        } else {
+          setError("Не удалось загрузить способы оплаты. Обновите страницу.");
+        }
       });
   }, []);
 
@@ -135,7 +139,7 @@ export default function CoursePage() {
     <div className="container mx-auto px-4 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div>
             {course.image_url && (
               <div className="relative aspect-video rounded-2xl overflow-hidden mb-6">
                 <Image src={course.image_url} alt={course.title} fill className="object-cover" />
@@ -144,7 +148,7 @@ export default function CoursePage() {
             )}
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{course.title}</h1>
             <p className="text-muted-foreground text-lg leading-relaxed">{course.description}</p>
-          </motion.div>
+          </div>
 
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Программа курса</h2>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Award, Copy, CheckCircle2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,24 +41,19 @@ export default function CertificatesPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <div>
         <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Мои сертификаты</h1>
         <p className="text-muted-foreground mb-4">Выдаются после 100% прохождения курса</p>
         <Link href="/certificates/verify" className="text-sm text-copper-400 hover:underline inline-flex items-center gap-1 mb-10">
           Проверить сертификат по номеру
           <ExternalLink className="h-3 w-3" />
         </Link>
-      </motion.div>
+      </div>
 
       {certs.length > 0 ? (
         <div className="space-y-6">
           {certs.map((cert, i) => (
-            <motion.div
-              key={cert.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
+            <div key={cert.id}>
               <Card className="border-copper-500/20 overflow-hidden">
                 <div className="h-2 bg-gradient-to-r from-copper-700 via-copper-500 to-copper-300" />
                 <CardContent className="p-8 text-center space-y-4">
@@ -86,7 +80,7 @@ export default function CertificatesPage() {
                   </Link>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : (

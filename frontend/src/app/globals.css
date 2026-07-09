@@ -29,16 +29,24 @@
   body {
     @apply bg-[#030303] text-foreground antialiased;
     min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 }
 
 @layer utilities {
+  /* No backdrop-blur on mobile — Safari freezes on heavy blur layers */
   .glass {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
+    @apply bg-white/[0.06] border border-white/[0.08];
+  }
+
+  @media (min-width: 768px) {
+    .glass {
+      @apply bg-white/[0.03] backdrop-blur-xl;
+    }
   }
 
   .glass-hover {
-    @apply transition-all duration-300 hover:bg-white/[0.06] hover:border-copper-500/30 hover:shadow-lg hover:shadow-copper-900/20;
+    @apply transition-colors duration-300 hover:bg-white/[0.08] hover:border-copper-500/30;
   }
 
   .gradient-text {
