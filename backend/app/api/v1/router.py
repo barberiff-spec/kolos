@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     payments,
     progress,
     promos,
+    settings,
     uploads,
     users,
 )
@@ -29,4 +30,5 @@ api_router.include_router(certificates.router)
 api_router.include_router(comments.router)
 api_router.include_router(promos.router)
 api_router.include_router(content.router)
+api_router.include_router(settings.router)
 api_router.include_router(uploads.router)

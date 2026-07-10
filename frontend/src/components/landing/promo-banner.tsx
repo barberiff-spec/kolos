@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function PromoBanner() {
+export function PromoBanner({ text }: { text?: string }) {
   return (
     <section className="container mx-auto px-4 -mt-8 mb-4">
       <div className="premium-card flex flex-col sm:flex-row items-center justify-between gap-4 border-copper-500/30 bg-gradient-to-r from-copper-950/40 to-transparent">
@@ -11,7 +11,7 @@ export function PromoBanner() {
             <Tag className="h-5 w-5 text-copper-400" />
           </div>
           <div>
-            <p className="font-semibold text-copper-100">Промокод KOLOS10 — скидка 10%</p>
+            <p className="font-semibold text-copper-100">{text || "Промокод KOLOS10 — скидка 10%"}</p>
             <p className="text-sm text-muted-foreground">Введите на странице курса перед оплатой</p>
           </div>
         </div>

@@ -109,6 +109,12 @@ export interface Comment {
   user_role?: string | null;
 }
 
+export interface CommentAdmin extends Comment {
+  lesson_title?: string | null;
+  course_id?: number | null;
+  course_title?: string | null;
+}
+
 export interface PromoCode {
   id: number;
   code: string;
@@ -160,5 +166,23 @@ export interface LessonProgress {
   lesson_id: number;
   completed: boolean;
   completed_at: string | null;
+  updated_at: string;
+}
+
+export interface SiteSettings {
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  promo_banner_text: string | null;
+  promo_banner_enabled: boolean;
+  contact_email: string | null;
+  contact_phone: string | null;
+  contact_address: string | null;
+  social_instagram: string | null;
+  social_telegram: string | null;
+  social_whatsapp: string | null;
+  social_vk: string | null;
+  footer_text: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
   updated_at: string;
 }

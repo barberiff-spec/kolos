@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowDown, ArrowUp, ChevronDown, ChevronUp, Edit, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,8 @@ export default function AdminCourseEditorPage() {
   const { user, isAuthenticated, isLoading } = useAuthStore();
   const [course, setCourse] = useState<Course | null>(null);
   const [expandedModule, setExpandedModule] = useState<number | null>(null);
+  const [editingModuleId, setEditingModuleId] = useState<number | null>(null);
+  const [moduleTitleDraft, setModuleTitleDraft] = useState("");
 
   useEffect(() => {
     if (isLoading) return;
@@ -74,6 +76,46 @@ export default function AdminCourseEditorPage() {
     loadCourse();
   };
 
+  const startEditModuleTitle = (module: Module) => {
+    setEditingModuleId(module.id);
+    setModuleTitleDraft(module.title);
+  };
+
+  const saveModuleTitle = async (moduleId: number) => {
+    if (moduleTitleDraft.trim()) {
+      await api.patch(`/modules/${moduleId}`, { title: moduleTitleDraft.trim() });
+    }
+    setEditingModuleId(null);
+    loadCourse();
+  };
+
+  const moveModule = async (index: number, direction: -1 | 1) => {
+    const modules = course?.modules;
+    if (!modules) return;
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= modules.length) return;
+    const a = modules[index];
+    const b = modules[targetIndex];
+    await Promise.all([
+      api.patch(`/modules/${a.id}`, { order: b.order }),
+      api.patch(`/modules/${b.id}`, { order: a.order }),
+    ]);
+    loadCourse();
+  };
+
+  const moveLesson = async (module: Module, index: number, direction: -1 | 1) => {
+    const lessons = module.lessons;
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= lessons.length) return;
+    const a = lessons[index];
+    const b = lessons[targetIndex];
+    await Promise.all([
+      api.patch(`/lessons/${a.id}`, { order: b.order }),
+      api.patch(`/lessons/${b.id}`, { order: a.order }),
+    ]);
+    loadCourse();
+  };
+
   if (!course) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -96,16 +138,64 @@ export default function AdminCourseEditorPage() {
           <Card key={module.id} className="border-copper-500/10 overflow-hidden">
             <CardHeader
               className="cursor-pointer flex flex-row items-center justify-between py-4 bg-white/[0.02]"
-              onClick={() => setExpandedModule(expandedModule === module.id ? null : module.id)}
+              onClick={() => editingModuleId !== module.id && setExpandedModule(expandedModule === module.id ? null : module.id)}
             >
-              <CardTitle className="text-base flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-copper-600/20 text-copper-400 text-sm">
+              <CardTitle className="text-base flex items-center gap-2 min-w-0 flex-1">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-copper-600/20 text-copper-400 text-sm">
                   {mi + 1}
                 </span>
-                {module.title}
-                <span className="text-xs text-muted-foreground font-normal">({module.lessons.length} уроков)</span>
+                {editingModuleId === module.id ? (
+                  <Input
+                    autoFocus
+                    value={moduleTitleDraft}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setModuleTitleDraft(e.target.value)}
+                    onBlur={() => saveModuleTitle(module.id)}
+                    onKeyDown={(e) => e.key === "Enter" && saveModuleTitle(module.id)}
+                    className="h-9"
+                  />
+                ) : (
+                  <>
+                    <span className="truncate">{module.title}</span>
+                    <span className="text-xs text-muted-foreground font-normal shrink-0">
+                      ({module.lessons.length} уроков)
+                    </span>
+                  </>
+                )}
               </CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={mi === 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveModule(mi, -1);
+                  }}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={mi === (course.modules?.length || 1) - 1}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    moveModule(mi, 1);
+                  }}
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    startEditModuleTitle(module);
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -126,9 +216,27 @@ export default function AdminCourseEditorPage() {
                   <div key={lesson.id} className="rounded-xl border border-white/5 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-copper-400">Урок {li + 1}</span>
-                      <Button variant="ghost" size="icon" onClick={() => deleteLesson(lesson.id)}>
-                        <Trash2 className="h-4 w-4 text-red-400" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={li === 0}
+                          onClick={() => moveLesson(module, li, -1)}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={li === module.lessons.length - 1}
+                          onClick={() => moveLesson(module, li, 1)}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteLesson(lesson.id)}>
+                          <Trash2 className="h-4 w-4 text-red-400" />
+                        </Button>
+                      </div>
                     </div>
                     <div>
                       <Label>Название</Label>

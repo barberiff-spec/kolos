@@ -15,6 +15,11 @@ class CertificateRead(BaseModel):
     user_name: str | None = None
 
 
+class CertificateIssue(BaseModel):
+    user_id: int
+    course_id: int
+
+
 class CommentCreate(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
 
@@ -29,6 +34,12 @@ class CommentRead(BaseModel):
     created_at: datetime
     user_name: str | None = None
     user_role: str | None = None
+
+
+class CommentAdminRead(CommentRead):
+    lesson_title: str | None = None
+    course_id: int | None = None
+    course_title: str | None = None
 
 
 class PromoCodeCreate(BaseModel):
@@ -126,3 +137,40 @@ class FAQRead(BaseModel):
     order: int
     is_published: bool
     created_at: datetime
+
+
+class SiteSettingsUpdate(BaseModel):
+    hero_title: str | None = Field(default=None, max_length=255)
+    hero_subtitle: str | None = None
+    promo_banner_text: str | None = Field(default=None, max_length=500)
+    promo_banner_enabled: bool | None = None
+    contact_email: str | None = Field(default=None, max_length=255)
+    contact_phone: str | None = Field(default=None, max_length=50)
+    contact_address: str | None = Field(default=None, max_length=500)
+    social_instagram: str | None = Field(default=None, max_length=500)
+    social_telegram: str | None = Field(default=None, max_length=500)
+    social_whatsapp: str | None = Field(default=None, max_length=500)
+    social_vk: str | None = Field(default=None, max_length=500)
+    footer_text: str | None = Field(default=None, max_length=500)
+    meta_title: str | None = Field(default=None, max_length=255)
+    meta_description: str | None = Field(default=None, max_length=500)
+
+
+class SiteSettingsRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    hero_title: str | None
+    hero_subtitle: str | None
+    promo_banner_text: str | None
+    promo_banner_enabled: bool
+    contact_email: str | None
+    contact_phone: str | None
+    contact_address: str | None
+    social_instagram: str | None
+    social_telegram: str | None
+    social_whatsapp: str | None
+    social_vk: str | None
+    footer_text: str | None
+    meta_title: str | None
+    meta_description: str | None
+    updated_at: datetime

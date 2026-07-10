@@ -243,3 +243,28 @@ class FAQ(Base):
     order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_published: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SiteSettings(Base):
+    """Singleton row (id=1) holding site-wide text/contact config editable from the admin panel."""
+
+    __tablename__ = "site_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    hero_title: Mapped[str | None] = mapped_column(String(255))
+    hero_subtitle: Mapped[str | None] = mapped_column(Text)
+    promo_banner_text: Mapped[str | None] = mapped_column(String(500))
+    promo_banner_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    contact_email: Mapped[str | None] = mapped_column(String(255))
+    contact_phone: Mapped[str | None] = mapped_column(String(50))
+    contact_address: Mapped[str | None] = mapped_column(String(500))
+    social_instagram: Mapped[str | None] = mapped_column(String(500))
+    social_telegram: Mapped[str | None] = mapped_column(String(500))
+    social_whatsapp: Mapped[str | None] = mapped_column(String(500))
+    social_vk: Mapped[str | None] = mapped_column(String(500))
+    footer_text: Mapped[str | None] = mapped_column(String(500))
+    meta_title: Mapped[str | None] = mapped_column(String(255))
+    meta_description: Mapped[str | None] = mapped_column(String(500))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

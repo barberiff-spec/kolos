@@ -3,11 +3,42 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_current_admin, get_current_user
 from app.db.session import get_db
-from app.models import Comment, Lesson, User
-from app.schemas.extras import CommentCreate, CommentRead
+from app.models import Comment, Lesson, Module, User
+from app.schemas.extras import CommentAdminRead, CommentCreate, CommentRead
 from app.services.course_service import user_has_enrollment
 
 router = APIRouter(prefix="/comments", tags=["Comments"])
+
+
+@router.get("", response_model=list[CommentAdminRead])
+def list_all_comments(db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    comments = (
+        db.query(Comment)
+        .options(joinedload(Comment.lesson).joinedload(Lesson.module).joinedload(Module.course))
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+    result = []
+    for c in comments:
+        user = db.get(User, c.user_id)
+        lesson = c.lesson
+        module = lesson.module if lesson else None
+        course = module.course if module else None
+        result.append(
+            CommentAdminRead(
+                id=c.id,
+                user_id=c.user_id,
+                lesson_id=c.lesson_id,
+                content=c.content,
+                created_at=c.created_at,
+                user_name=user.full_name if user else None,
+                user_role=user.role.value if user else None,
+                lesson_title=lesson.title if lesson else None,
+                course_id=course.id if course else None,
+                course_title=course.title if course else None,
+            )
+        )
+    return result
 
 
 @router.get("/lesson/{lesson_id}", response_model=list[CommentRead])

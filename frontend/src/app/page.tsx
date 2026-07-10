@@ -3,18 +3,25 @@ import { ArrowRight, Award, BookOpen, Play, Scissors, Sparkles, Star } from "luc
 import { PromoBanner } from "@/components/landing/promo-banner";
 import { serverFetch } from "@/lib/server-api";
 import { formatPrice } from "@/lib/utils";
-import type { CourseListItem, FAQ, Review } from "@/lib/types";
+import type { CourseListItem, FAQ, Review, SiteSettings } from "@/lib/types";
+
+const DEFAULT_HERO_TITLE = "Академия барберинга нового уровня";
+const DEFAULT_HERO_SUBTITLE =
+  "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
+  "и работа с инструментами — обучение от мастеров премиальных барбершопов.";
 
 async function getData() {
-  const [courses, reviews, faqs] = await Promise.all([
+  const [courses, reviews, faqs, settings] = await Promise.all([
     serverFetch<CourseListItem[]>("/courses?published_only=true"),
     serverFetch<Review[]>("/content/reviews"),
     serverFetch<FAQ[]>("/content/faq"),
+    serverFetch<SiteSettings>("/settings"),
   ]);
   return {
     courses: (courses || []).slice(0, 3),
     reviews: reviews || [],
     faqs: faqs || [],
+    settings,
   };
 }
 
@@ -26,8 +33,10 @@ const btnOutline =
   `${btn} border border-copper-500/20 bg-transparent text-foreground hover:bg-copper-500/5`;
 
 export default async function HomePage() {
-  const { courses, reviews, faqs } = await getData();
+  const { courses, reviews, faqs, settings } = await getData();
   const minPrice = courses.length > 0 ? Math.min(...courses.map((c) => c.price)) : null;
+  const heroTitle = settings?.hero_title || DEFAULT_HERO_TITLE;
+  const heroSubtitle = settings?.hero_subtitle || DEFAULT_HERO_SUBTITLE;
 
   return (
     <div>
@@ -42,11 +51,10 @@ export default async function HomePage() {
               <span className="gradient-text">KOLOS</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-4 font-light tracking-wide">
-              Академия барберинга нового уровня
+              {heroTitle}
             </p>
             <p className="text-base text-muted-foreground/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой
-              и работа с инструментами — обучение от мастеров премиальных барбершопов.
+              {heroSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/courses" className={btnPrimary}>
@@ -76,7 +84,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <PromoBanner />
+      {settings?.promo_banner_enabled !== false && (
+        <PromoBanner text={settings?.promo_banner_text || undefined} />
+      )}
 
       <section className="container mx-auto px-4 py-20">
         <div className="flex items-center justify-between mb-10">
