@@ -4,6 +4,19 @@ from typing import Annotated, List
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
+# Always allowed in production regardless of the CORS_ORIGINS env var, so a
+# missing/incomplete env config can't accidentally lock out the real
+# frontend deployments. Extend this list (or just set CORS_ORIGINS) when a
+# new deployment target is added.
+KNOWN_PRODUCTION_ORIGINS = [
+    "https://kolos-academy.ru",
+    "https://www.kolos-academy.ru",
+    "https://kolos-academy.vercel.app",
+    "https://kolos-barberiff-spec.vercel.app",
+    "https://frontend-barberiff-spec.vercel.app",
+    "https://frontend-blond-one-25.vercel.app",
+]
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -65,18 +78,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def apply_production_defaults(self) -> "Settings":
-        production_origins = [
-            "https://kolos-academy.ru",
-            "https://www.kolos-academy.ru",
-            "https://kolos-academy.vercel.app",
-            "https://kolos-barberiff-spec.vercel.app",
-            "https://frontend-barberiff-spec.vercel.app",
-            "https://frontend-blond-one-25.vercel.app",
-        ]
         merged = list(self.cors_origins)
-        for origin in production_origins:
+        for origin in KNOWN_PRODUCTION_ORIGINS:
             if origin not in merged:
                 merged.append(origin)
+        # Settings is effectively frozen after construction under pydantic v2,
+        # so mutating cors_origins/cookie_* here requires bypassing __setattr__.
         object.__setattr__(self, "cors_origins", merged)
 
         # Frontend and API are on different hosts → cookies must be SameSite=None; Secure

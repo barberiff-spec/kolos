@@ -21,6 +21,9 @@ export const viewport: Viewport = {
   themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
+  // Lets content extend under the iPhone notch/home indicator instead of
+  // leaving a hard white/black bar; paired with safe-area padding in CSS.
+  viewportFit: "cover",
 };
 
 const SW_CLEANUP = `
@@ -50,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PremiumBackground />
         <AuthProvider>
           <Navbar />
-          <main className="relative min-h-[calc(100vh-4rem)]">{children}</main>
+          <main className="relative min-h-[calc(100dvh-4rem)]">{children}</main>
         </AuthProvider>
       </body>
     </html>

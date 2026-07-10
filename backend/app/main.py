@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -10,6 +11,16 @@ from app.core.config import get_settings
 from app.services.seed import seed_database
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Runs once on startup, before the app accepts requests.
+    # (Replaces the deprecated @app.on_event("startup") hook.)
+    seed_database()
+    yield
+    # No teardown steps needed today; kept as an explicit no-op so future
+    # cleanup (closing pools, flushing queues) has an obvious home.
 
 
 def custom_openapi(app: FastAPI):
@@ -47,6 +58,7 @@ def create_app() -> FastAPI:
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -66,10 +78,6 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["Health"])
     def health():
         return {"status": "ok", "app": settings.app_name, "version": settings.app_version}
-
-    @app.on_event("startup")
-    def on_startup():
-        seed_database()
 
     app.openapi = lambda: custom_openapi(app)
     return app

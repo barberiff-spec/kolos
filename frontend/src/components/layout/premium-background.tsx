@@ -1,6 +1,12 @@
 export function PremiumBackground() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden [transform:translateZ(0)] [will-change:transform]"
+    >
+      {/* transform/will-change forces Safari to promote this fixed layer to
+          its own GPU compositing layer, preventing it from repainting (and
+          briefly flickering/whiting-out) every time the page scrolls. */}
       <div className="absolute inset-0 bg-[#030303]" />
       <div
         className="absolute inset-0 opacity-[0.35]"

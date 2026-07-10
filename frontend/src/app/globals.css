@@ -28,8 +28,21 @@
 
   body {
     @apply bg-[#030303] text-foreground antialiased;
+    /* 100vh fallback for older WebKit, then dvh (dynamic viewport height)
+       overrides it — fixes the iOS Safari bug where the address bar
+       collapsing/expanding leaves stale viewport math and cuts off content. */
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Smooth momentum scrolling inside nested scroll containers on iOS Safari.
+     Without this, panes like the lesson sidebar/content split can feel
+     "sticky" or stop responding to touch mid-scroll. */
+  .ios-scroll {
+    -webkit-overflow-scrolling: touch;
   }
 }
 

@@ -47,7 +47,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+    <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Card>
           <CardHeader className="text-center">
@@ -133,7 +133,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center text-muted-foreground">
+        <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center text-muted-foreground">
           Загрузка…
         </div>
       }

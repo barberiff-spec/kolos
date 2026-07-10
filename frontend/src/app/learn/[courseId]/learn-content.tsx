@@ -87,7 +87,7 @@ export default function LearnContent() {
 
   if (loading || authLoading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+      <div className="flex h-[calc(100dvh-4rem)] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
       </div>
     );
@@ -104,10 +104,10 @@ export default function LearnContent() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden">
       <aside
         className={cn(
-          "border-r border-white/5 bg-[#0a0a0a]/95 md:bg-black/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",
+          "ios-scroll border-r border-white/5 bg-[#0a0a0a]/95 md:bg-black/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",
           sidebarOpen ? "w-80" : "w-0"
         )}
       >
@@ -156,8 +156,11 @@ export default function LearnContent() {
         </div>
       </aside>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/5 bg-[#0a0a0a]/95 md:bg-background/80 md:backdrop-blur-xl px-4 py-3">
+      <div className="ios-scroll flex-1 overflow-y-auto">
+        {/* Solid background instead of backdrop-blur: Safari fails to repaint
+            backdrop-filter on a sticky element inside a nested scroll
+            container, so the blur freezes or disappears mid-scroll. */}
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/5 bg-[#0a0a0a] px-4 py-3">
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
