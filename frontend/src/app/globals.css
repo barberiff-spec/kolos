@@ -63,7 +63,7 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-copper-400 via-copper-300 to-amber-200 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-neutral-100 via-zinc-300 to-neutral-500 bg-clip-text text-transparent;
   }
 
   .premium-card {
@@ -72,6 +72,13 @@
 
   .copper-glow {
     box-shadow: 0 0 40px rgba(205, 127, 50, 0.15);
+  }
+
+  /* Fine film-grain noise layered over the black background — flat black
+     reads cheap, a subtle grain reads like brushed metal / premium print. */
+  .noise-texture {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
   }
 }
 
