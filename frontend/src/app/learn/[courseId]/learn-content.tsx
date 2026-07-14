@@ -88,7 +88,7 @@ export default function LearnContent() {
   if (loading || authLoading) {
     return (
       <div className="flex h-[calc(100dvh-4rem)] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function LearnContent() {
 
   if (!activeLesson) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
+      <div className="container mx-auto px-4 py-20 text-center text-muted">
         В этом курсе пока нет уроков
       </div>
     );
@@ -107,18 +107,18 @@ export default function LearnContent() {
     <div className="flex h-[calc(100dvh-4rem)] overflow-hidden">
       <aside
         className={cn(
-          "ios-scroll border-r border-white/5 bg-[#0a0a0a]/95 md:bg-black/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",
+          "ios-scroll border-r border-text/5 bg-bg/95 md:bg-bg/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",
           sidebarOpen ? "w-80" : "w-0"
         )}
       >
-        <div className="p-4 border-b border-white/5">
-          <Link href={`/course/${courseId}`} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-3">
+        <div className="p-4 border-b border-text/5">
+          <Link href={`/course/${courseId}`} className="text-sm text-muted hover:text-text flex items-center gap-1 mb-3">
             <ChevronLeft className="h-4 w-4" />
             Назад к курсу
           </Link>
           <h2 className="font-semibold line-clamp-2">{course.title}</h2>
           <div className="mt-3 space-y-1">
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted">
               <span>Прогресс</span>
               <span>{course.progress_percent?.toFixed(0)}%</span>
             </div>
@@ -129,7 +129,7 @@ export default function LearnContent() {
         <div className="p-2">
           {course.modules?.map((module) => (
             <div key={module.id} className="mb-4">
-              <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <p className="px-3 py-2 text-xs font-medium text-muted uppercase tracking-wider">
                 {module.title}
               </p>
               {module.lessons.map((lesson) => (
@@ -139,12 +139,12 @@ export default function LearnContent() {
                   className={cn(
                     "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-left transition-all",
                     activeLesson.id === lesson.id
-                      ? "bg-copper-600/20 text-copper-300"
-                      : "hover:bg-white/5 text-muted-foreground hover:text-foreground"
+                      ? "bg-accent/20 text-accent"
+                      : "hover:bg-text/5 text-muted hover:text-text"
                   )}
                 >
                   {lesson.completed ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />
                   ) : (
                     <Circle className="h-4 w-4 shrink-0" />
                   )}
@@ -160,7 +160,7 @@ export default function LearnContent() {
         {/* Solid background instead of backdrop-blur: Safari fails to repaint
             backdrop-filter on a sticky element inside a nested scroll
             container, so the blur freezes or disappears mid-scroll. */}
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-white/5 bg-[#0a0a0a] px-4 py-3">
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-text/5 bg-bg px-4 py-3">
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -176,7 +176,7 @@ export default function LearnContent() {
 
           {activeLesson.content && (
             <div className="premium-card prose prose-invert max-w-none">
-              <div className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+              <div className="whitespace-pre-wrap text-muted leading-relaxed">
                 {activeLesson.content}
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function LearnContent() {
             {!activeLesson.completed ? (
               <Button onClick={() => markComplete(true)}>Отметить пройденным</Button>
             ) : (
-              <span className="text-sm text-green-400 flex items-center gap-1">
+              <span className="text-sm text-accent flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4" />
                 Пройден
               </span>

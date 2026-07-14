@@ -9,10 +9,10 @@ const items = [
 
 export function CheckoutTrust() {
   return (
-    <div className="rounded-xl border border-copper-500/10 bg-white/[0.02] p-4 space-y-3">
+    <div className="rounded-xl border border-accent/10 bg-text/[0.02] p-4 space-y-3">
       {items.map((item) => (
-        <div key={item.text} className="flex items-center gap-3 text-xs text-muted-foreground">
-          <item.icon className="h-4 w-4 shrink-0 text-copper-500" />
+        <div key={item.text} className="flex items-center gap-3 text-xs text-muted">
+          <item.icon className="h-4 w-4 shrink-0 text-accent" />
           <span>{item.text}</span>
         </div>
       ))}

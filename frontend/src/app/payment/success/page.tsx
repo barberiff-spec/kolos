@@ -21,11 +21,11 @@ function SuccessContent() {
 
   return (
     <div className="container mx-auto px-4 py-20 max-w-md">
-      <Card className="border-copper-500/20 text-center">
+      <Card className="border-accent/20 text-center">
         <CardContent className="p-10 space-y-6">
-          <CheckCircle2 className="h-16 w-16 text-green-400 mx-auto" />
-          <h1 className="text-2xl font-bold font-[family-name:var(--font-playfair)]">Оплата успешна!</h1>
-          <p className="text-muted-foreground">Доступ к курсу открыт. Можете начать обучение прямо сейчас.</p>
+          <CheckCircle2 className="h-16 w-16 text-accent mx-auto" />
+          <h1 className="text-2xl font-bold uppercase tracking-tight">Оплата успешна!</h1>
+          <p className="text-muted">Доступ к курсу открыт. Можете начать обучение прямо сейчас.</p>
           <div className="flex flex-col gap-3">
             {courseId && (
               <Link href={`/learn/${courseId}`}>
@@ -46,7 +46,7 @@ export default function PaymentSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
+        <div className="container mx-auto px-4 py-20 text-center text-muted">
           Загрузка…
         </div>
       }

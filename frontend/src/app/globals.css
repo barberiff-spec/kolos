@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    --background: 0 0% 1%;
-    --foreground: 35 20% 95%;
-    --card: 0 0% 4%;
-    --card-foreground: 35 20% 95%;
-    --primary: 30 58% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 7%;
-    --secondary-foreground: 35 20% 95%;
-    --muted: 0 0% 9%;
-    --muted-foreground: 30 8% 55%;
-    --accent: 30 58% 45%;
-    --accent-foreground: 0 0% 100%;
-    --border: 30 10% 12%;
-    --input: 30 10% 12%;
-    --ring: 30 58% 50%;
-    --radius: 0.75rem;
+    /* Teal design tokens — RGB channels (identical to the hex below).
+       Channel form keeps Tailwind alpha utilities working: bg-accent/40 etc. */
+    --bg: 15 18 25;             /* #0F1219  глубокий чёрный, основной фон */
+    --surface: 26 31 43;        /* #1A1F2B  карточки, панели, модалки, инпуты */
+    --accent: 18 168 157;       /* #12A89D  бирюзовый — CTA, иконки, выделения */
+    --accent-deep: 13 115 106;  /* #0D736A  тёмно-бирюзовый — hover, вторичные кнопки */
+    --text: 245 245 245;        /* #F5F5F5  заголовки и основной контент */
+    --text-muted: 188 195 208;  /* #BCC3D0  подписи, disabled, вспомогательный текст */
+    --border: 110 122 145;      /* #6E7A91  границы, разделители */
+    --danger: 239 68 68;        /* #EF4444  текст ошибок на тёмном фоне */
+    --danger-strong: 220 38 38; /* #DC2626  фон кнопки удаления под белым текстом */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   * {
@@ -27,10 +27,7 @@
   }
 
   body {
-    @apply bg-[#030303] text-foreground antialiased;
-    /* 100vh fallback for older WebKit, then dvh (dynamic viewport height)
-       overrides it — fixes the iOS Safari bug where the address bar
-       collapsing/expanding leaves stale viewport math and cuts off content. */
+    @apply bg-bg text-text antialiased;
     min-height: 100vh;
     min-height: 100dvh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -38,44 +35,39 @@
 }
 
 @layer utilities {
-  /* Smooth momentum scrolling inside nested scroll containers on iOS Safari.
-     Without this, panes like the lesson sidebar/content split can feel
-     "sticky" or stop responding to touch mid-scroll. */
   .ios-scroll {
     -webkit-overflow-scrolling: touch;
   }
 }
 
 @layer utilities {
-  /* No backdrop-blur on mobile — Safari freezes on heavy blur layers */
   .glass {
-    @apply bg-white/[0.06] border border-white/[0.08];
+    @apply bg-surface border border-border;
   }
 
   @media (min-width: 768px) {
     .glass {
-      @apply bg-white/[0.03] backdrop-blur-xl;
+      @apply bg-surface/60 backdrop-blur-xl;
     }
   }
 
   .glass-hover {
-    @apply transition-colors duration-300 hover:bg-white/[0.08] hover:border-copper-500/30;
+    @apply transition-colors duration-300 hover:bg-accent/[0.06] hover:border-accent/30;
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-neutral-100 via-zinc-300 to-neutral-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-text via-muted to-accent-deep bg-clip-text text-transparent;
   }
 
   .premium-card {
-    @apply glass rounded-2xl p-6 glass-hover;
+    /* card: --surface fill, hairline text-tinted border, 16px radius, soft black shadow, 24px padding */
+    @apply bg-surface border border-text/[0.06] rounded-[var(--radius-md)] p-6 shadow-card glass-hover;
   }
 
-  .copper-glow {
-    box-shadow: 0 0 40px rgba(205, 127, 50, 0.15);
+  .card-glow {
+    box-shadow: var(--shadow-card);
   }
 
-  /* Fine film-grain noise layered over the black background — flat black
-     reads cheap, a subtle grain reads like brushed metal / premium print. */
   .noise-texture {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
@@ -92,10 +84,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: rgb(var(--border));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(205, 127, 50, 0.4);
+  background: rgb(var(--accent) / 0.4);
 }

@@ -120,7 +120,7 @@ export default function CoursePage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function CoursePage() {
   if (!course || error) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <p className="text-muted-foreground">{error || "Курс не найден"}</p>
+        <p className="text-muted">{error || "Курс не найден"}</p>
       </div>
     );
   }
@@ -143,20 +143,20 @@ export default function CoursePage() {
             {course.image_url && (
               <div className="relative aspect-video rounded-2xl overflow-hidden mb-6">
                 <Image src={course.image_url} alt={course.title} fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-bg/60 to-transparent" />
               </div>
             )}
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{course.title}</h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">{course.description}</p>
+            <p className="text-muted text-lg leading-relaxed">{course.description}</p>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold">Программа курса</h2>
+            <h2 className="text-2xl font-semibold uppercase tracking-tight">Программа курса</h2>
             {course.modules?.map((module, mi) => (
               <Card key={module.id} className="p-0 overflow-hidden">
-                <CardHeader className="bg-white/[0.02] border-b border-white/5 py-4">
+                <CardHeader className="bg-text/[0.02] border-b border-text/5 py-4">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-copper-600/20 text-copper-400 text-sm">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/20 text-accent text-sm">
                       {mi + 1}
                     </span>
                     {module.title}
@@ -166,23 +166,23 @@ export default function CoursePage() {
                   {module.lessons.map((lesson) => (
                     <div
                       key={lesson.id}
-                      className="flex items-center justify-between px-6 py-4 border-b border-white/5 last:border-0"
+                      className="flex items-center justify-between px-6 py-4 border-b border-text/5 last:border-0"
                     >
                       <div className="flex items-center gap-3">
                         {course.is_enrolled ? (
                           lesson.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-400" />
+                            <CheckCircle2 className="h-5 w-5 text-accent" />
                           ) : (
-                            <Play className="h-5 w-5 text-copper-400" />
+                            <Play className="h-5 w-5 text-accent" />
                           )
                         ) : (
-                          <Lock className="h-5 w-5 text-muted-foreground" />
+                          <Lock className="h-5 w-5 text-muted" />
                         )}
-                        <span className={course.is_enrolled ? "" : "text-muted-foreground"}>
+                        <span className={course.is_enrolled ? "" : "text-muted"}>
                           {lesson.title}
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{lesson.duration_minutes} мин</span>
+                      <span className="text-xs text-muted">{lesson.duration_minutes} мин</span>
                     </div>
                   ))}
                 </CardContent>
@@ -198,14 +198,14 @@ export default function CoursePage() {
                 {formatPrice(promoApplied ? promoApplied.final_price : course.price)}
               </div>
               {promoApplied && (
-                <p className="text-sm text-green-400">
+                <p className="text-sm text-accent">
                   Скидка {formatPrice(promoApplied.discount)} применена
                 </p>
               )}
 
               {!course.is_enrolled && isAuthenticated && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Label className="text-xs text-muted flex items-center gap-1">
                     <Tag className="h-3 w-3" /> Промокод
                   </Label>
                   <div className="flex gap-2">
@@ -222,7 +222,7 @@ export default function CoursePage() {
                 </div>
               )}
 
-              {error && <p className="text-sm text-red-400">{error}</p>}
+              {error && <p className="text-sm text-danger">{error}</p>}
 
               {!course.is_enrolled && isAuthenticated && paymentMethods.length > 0 && (
                 <PaymentMethodSelector
@@ -234,7 +234,7 @@ export default function CoursePage() {
 
               {!course.is_enrolled && <CheckoutTrust />}
 
-              <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="space-y-3 text-sm text-muted">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
                   {totalLessons} уроков
@@ -243,7 +243,7 @@ export default function CoursePage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Прогресс</span>
-                      <span className="text-copper-400">{course.progress_percent?.toFixed(0)}%</span>
+                      <span className="text-accent">{course.progress_percent?.toFixed(0)}%</span>
                     </div>
                     <Progress value={course.progress_percent || 0} />
                   </div>
@@ -265,10 +265,10 @@ export default function CoursePage() {
               )}
 
               {!isAuthenticated && (
-                <p className="text-xs text-center text-muted-foreground">
+                <p className="text-xs text-center text-muted">
                   <Link
                     href={`/auth/login?redirect=${encodeURIComponent(`/course/${courseId}`)}&mode=register`}
-                    className="text-copper-400 hover:underline"
+                    className="text-accent hover:underline"
                   >
                     Зарегистрируйтесь
                   </Link>

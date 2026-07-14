@@ -13,7 +13,7 @@ export function VideoPlayer({ videoUrl, videoType, title }: VideoPlayerProps) {
   if (!videoUrl || videoType === "none") {
     return (
       <div className="aspect-video rounded-2xl glass flex items-center justify-center">
-        <p className="text-muted-foreground">Видео не добавлено</p>
+        <p className="text-muted">Видео не добавлено</p>
       </div>
     );
   }
@@ -21,7 +21,7 @@ export function VideoPlayer({ videoUrl, videoType, title }: VideoPlayerProps) {
   if (videoType === "youtube") {
     const videoId = extractYouTubeId(videoUrl);
     if (!videoId) {
-      return <div className="aspect-video rounded-2xl glass flex items-center justify-center text-muted-foreground">Некорректная ссылка YouTube</div>;
+      return <div className="aspect-video rounded-2xl glass flex items-center justify-center text-muted">Некорректная ссылка YouTube</div>;
     }
     return (
       <div className="aspect-video rounded-2xl overflow-hidden glass">
@@ -39,7 +39,7 @@ export function VideoPlayer({ videoUrl, videoType, title }: VideoPlayerProps) {
   if (videoType === "vk") {
     const vk = extractVkVideoId(videoUrl);
     if (!vk) {
-      return <div className="aspect-video rounded-2xl glass flex items-center justify-center text-muted-foreground">Некорректная ссылка VK Video</div>;
+      return <div className="aspect-video rounded-2xl glass flex items-center justify-center text-muted">Некорректная ссылка VK Video</div>;
     }
     return (
       <div className="aspect-video rounded-2xl overflow-hidden glass">

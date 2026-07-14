@@ -119,29 +119,29 @@ export default function AdminCourseEditorPage() {
   if (!course) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Link href="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
+      <Link href="/admin" className="inline-flex items-center gap-1 text-sm text-muted hover:text-text mb-6">
         <ArrowLeft className="h-4 w-4" /> Назад в админку
       </Link>
 
       <h1 className="text-2xl font-bold mb-2">{course.title}</h1>
-      <p className="text-muted-foreground mb-8">Редактор модулей и уроков</p>
+      <p className="text-muted mb-8">Редактор модулей и уроков</p>
 
       <div className="space-y-4">
         {course.modules?.map((module, mi) => (
-          <Card key={module.id} className="border-copper-500/10 overflow-hidden">
+          <Card key={module.id} className="border-accent/10 overflow-hidden">
             <CardHeader
-              className="cursor-pointer flex flex-row items-center justify-between py-4 bg-white/[0.02]"
+              className="cursor-pointer flex flex-row items-center justify-between py-4 bg-text/[0.02]"
               onClick={() => editingModuleId !== module.id && setExpandedModule(expandedModule === module.id ? null : module.id)}
             >
               <CardTitle className="text-base flex items-center gap-2 min-w-0 flex-1">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-copper-600/20 text-copper-400 text-sm">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent text-sm">
                   {mi + 1}
                 </span>
                 {editingModuleId === module.id ? (
@@ -157,7 +157,7 @@ export default function AdminCourseEditorPage() {
                 ) : (
                   <>
                     <span className="truncate">{module.title}</span>
-                    <span className="text-xs text-muted-foreground font-normal shrink-0">
+                    <span className="text-xs text-muted font-normal shrink-0">
                       ({module.lessons.length} уроков)
                     </span>
                   </>
@@ -204,7 +204,7 @@ export default function AdminCourseEditorPage() {
                     deleteModule(module.id);
                   }}
                 >
-                  <Trash2 className="h-4 w-4 text-red-400" />
+                  <Trash2 className="h-4 w-4 text-danger" />
                 </Button>
                 {expandedModule === module.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
               </div>
@@ -213,9 +213,9 @@ export default function AdminCourseEditorPage() {
             {expandedModule === module.id && (
               <CardContent className="space-y-4 pt-0">
                 {module.lessons.map((lesson, li) => (
-                  <div key={lesson.id} className="rounded-xl border border-white/5 p-4 space-y-3">
+                  <div key={lesson.id} className="rounded-xl border border-text/5 p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-copper-400">Урок {li + 1}</span>
+                      <span className="text-sm font-medium text-accent">Урок {li + 1}</span>
                       <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
@@ -234,7 +234,7 @@ export default function AdminCourseEditorPage() {
                           <ArrowDown className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteLesson(lesson.id)}>
-                          <Trash2 className="h-4 w-4 text-red-400" />
+                          <Trash2 className="h-4 w-4 text-danger" />
                         </Button>
                       </div>
                     </div>
@@ -264,7 +264,7 @@ export default function AdminCourseEditorPage() {
                       <div>
                         <Label>Тип видео</Label>
                         <select
-                          className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm"
+                          className="flex h-11 w-full rounded-xl border border-text/10 bg-text/[0.03] px-4 text-sm"
                           defaultValue={lesson.video_type}
                           onChange={(e) => updateLesson(lesson, "video_type", e.target.value)}
                         >

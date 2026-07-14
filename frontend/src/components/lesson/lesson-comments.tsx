@@ -40,32 +40,32 @@ export function LessonComments({ lessonId }: { lessonId: number }) {
   };
 
   return (
-    <div className="premium-card border-copper-500/10">
+    <div className="premium-card border-accent/10">
       <h3 className="font-semibold flex items-center gap-2 mb-4">
-        <MessageSquare className="h-5 w-5 text-copper-500" />
+        <MessageSquare className="h-5 w-5 text-accent" />
         Вопросы и обсуждение
       </h3>
 
       <div className="space-y-4 mb-6">
         {comments.length === 0 && (
-          <p className="text-sm text-muted-foreground">Пока нет комментариев. Задайте первый вопрос!</p>
+          <p className="text-sm text-muted">Пока нет комментариев. Задайте первый вопрос!</p>
         )}
         {comments.map((c) => (
-          <div key={c.id} className="rounded-xl bg-white/[0.02] border border-white/5 p-4">
+          <div key={c.id} className="rounded-xl bg-text/[0.02] border border-text/5 p-4">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <span className="font-medium text-sm">{c.user_name}</span>
                 {c.user_role === "admin" && (
-                  <span className="ml-2 text-xs text-copper-500 bg-copper-500/10 px-2 py-0.5 rounded">Мастер</span>
+                  <span className="ml-2 text-xs text-accent bg-accent/10 px-2 py-0.5 rounded">Мастер</span>
                 )}
               </div>
               {(user?.role === "admin" || user?.id === c.user_id) && (
-                <button onClick={() => remove(c.id)} className="text-muted-foreground hover:text-red-400">
+                <button onClick={() => remove(c.id)} className="text-muted hover:text-danger">
                   <Trash2 className="h-4 w-4" />
                 </button>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">{c.content}</p>
+            <p className="text-sm text-muted">{c.content}</p>
           </div>
         ))}
       </div>
@@ -83,7 +83,7 @@ export function LessonComments({ lessonId }: { lessonId: number }) {
           </Button>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">Войдите, чтобы оставить комментарий</p>
+        <p className="text-sm text-muted">Войдите, чтобы оставить комментарий</p>
       )}
     </div>
   );

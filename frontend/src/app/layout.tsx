@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { PremiumBackground } from "@/components/layout/premium-background";
+import { Splash } from "@/components/layout/splash";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { serverFetch } from "@/lib/server-api";
 import type { SiteSettings } from "@/lib/types";
@@ -27,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#0F1219", // --bg
   width: "device-width",
   initialScale: 1,
   // Lets content extend under the iPhone notch/home indicator instead of
@@ -61,11 +63,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: SW_CLEANUP }} />
       </head>
       <body className="font-sans antialiased">
+        <Splash />
         <PremiumBackground />
         <AuthProvider>
           <Navbar />
           <main className="relative min-h-[calc(100dvh-4rem)]">{children}</main>
           <Footer settings={settings} />
+          <BottomNav />
         </AuthProvider>
       </body>
     </html>

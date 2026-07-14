@@ -23,12 +23,12 @@ export default function CertificateVerifyPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-lg">
-      <Card className="border-copper-500/20">
+      <Card className="border-accent/20">
         <CardHeader className="text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-copper-500/20 mx-auto mb-2">
-            <Award className="h-6 w-6 text-copper-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/20 mx-auto mb-2">
+            <Award className="h-6 w-6 text-accent" />
           </div>
-          <CardTitle className="font-[family-name:var(--font-playfair)]">Проверка сертификата</CardTitle>
+          <CardTitle>Проверка сертификата</CardTitle>
           <CardDescription>
             Работодатели и клиенты могут проверить подлинность сертификата KOLOS по номеру
           </CardDescription>
@@ -51,8 +51,8 @@ export default function CertificateVerifyPage() {
               Проверить
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            <Link href="/courses" className="text-copper-400 hover:underline">
+          <p className="text-xs text-muted text-center mt-6">
+            <Link href="/courses" className="text-accent hover:underline">
               Хотите получить свой сертификат? Смотрите курсы →
             </Link>
           </p>

@@ -34,7 +34,7 @@ export default function CertificatesPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
@@ -42,9 +42,9 @@ export default function CertificatesPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div>
-        <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Мои сертификаты</h1>
-        <p className="text-muted-foreground mb-4">Выдаются после 100% прохождения курса</p>
-        <Link href="/certificates/verify" className="text-sm text-copper-400 hover:underline inline-flex items-center gap-1 mb-10">
+        <h1 className="text-3xl font-bold uppercase tracking-tight mb-2">Мои сертификаты</h1>
+        <p className="text-muted mb-4">Выдаются после 100% прохождения курса</p>
+        <Link href="/certificates/verify" className="text-sm text-accent hover:underline inline-flex items-center gap-1 mb-10">
           Проверить сертификат по номеру
           <ExternalLink className="h-3 w-3" />
         </Link>
@@ -54,27 +54,27 @@ export default function CertificatesPage() {
         <div className="space-y-6">
           {certs.map((cert, i) => (
             <div key={cert.id}>
-              <Card className="border-copper-500/20 overflow-hidden">
-                <div className="h-2 bg-gradient-to-r from-copper-700 via-copper-500 to-copper-300" />
+              <Card className="border-accent/20 overflow-hidden">
+                <div className="h-2 bg-gradient-to-r from-accent via-accent to-accent-deep" />
                 <CardContent className="p-8 text-center space-y-4">
-                  <Award className="h-12 w-12 text-copper-500 mx-auto" />
+                  <Award className="h-12 w-12 text-accent mx-auto" />
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-copper-500 mb-2">KOLOS Barber Academy</p>
-                    <h2 className="text-xl font-bold font-[family-name:var(--font-playfair)]">{cert.course_title}</h2>
-                    <p className="text-muted-foreground mt-1">{user?.full_name}</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">KOLOS Barber Academy</p>
+                    <h2 className="text-xl font-bold">{cert.course_title}</h2>
+                    <p className="text-muted mt-1">{user?.full_name}</p>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-xl bg-copper-500/10 border border-copper-500/20 px-4 py-2">
-                    <code className="font-mono text-copper-300">{cert.certificate_code}</code>
-                    <button onClick={() => copyCode(cert.certificate_code)} className="text-muted-foreground hover:text-copper-400">
-                      {copied === cert.certificate_code ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                  <div className="inline-flex items-center gap-2 rounded-full bg-accent/10 border border-accent/20 px-4 py-2">
+                    <code className="font-mono text-accent">{cert.certificate_code}</code>
+                    <button onClick={() => copyCode(cert.certificate_code)} className="text-muted hover:text-accent">
+                      {copied === cert.certificate_code ? <CheckCircle2 className="h-4 w-4 text-accent" /> : <Copy className="h-4 w-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted">
                     Выдан {new Date(cert.issued_at).toLocaleDateString("ru-RU")}
                   </p>
                   <Link
                     href={`/certificates/verify/${cert.certificate_code}`}
-                    className="text-xs text-copper-400 hover:underline inline-block"
+                    className="text-xs text-accent hover:underline inline-block"
                   >
                     Ссылка для проверки работодателем
                   </Link>
@@ -86,9 +86,9 @@ export default function CertificatesPage() {
       ) : (
         <Card className="text-center py-16">
           <CardContent>
-            <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground mb-4">Пока нет сертификатов</p>
-            <p className="text-sm text-muted-foreground mb-6">Завершите все уроки курса, чтобы получить сертификат KOLOS</p>
+            <Award className="h-12 w-12 text-muted mx-auto mb-4" />
+            <p className="text-muted mb-4">Пока нет сертификатов</p>
+            <p className="text-sm text-muted mb-6">Завершите все уроки курса, чтобы получить сертификат KOLOS</p>
             <Link href="/cabinet">
               <Button>Мои курсы</Button>
             </Link>

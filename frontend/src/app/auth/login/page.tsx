@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { KolosLogo } from "@/components/KolosLogo";
 import { useAuthStore } from "@/store/auth";
 
 function LoginForm() {
@@ -51,9 +51,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         <Card>
           <CardHeader className="text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-copper-600 to-copper-800 mx-auto mb-4 copper-glow">
-              <Scissors className="h-6 w-6 text-white" />
-            </div>
+            <KolosLogo size={29} className="text-accent mx-auto mb-4" />
             <CardTitle>{isRegister ? "Регистрация" : "Вход в KOLOS"}</CardTitle>
             <CardDescription>
               {isRegister
@@ -98,7 +96,7 @@ function LoginForm() {
                 />
               </div>
 
-              {error && <p className="text-sm text-red-400">{error}</p>}
+              {error && <p className="text-sm text-danger">{error}</p>}
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти"}
@@ -108,7 +106,7 @@ function LoginForm() {
             <div className="mt-6 text-center text-sm">
               <button
                 type="button"
-                className="text-copper-400 hover:underline"
+                className="text-accent hover:underline"
                 onClick={() => setIsRegister(!isRegister)}
               >
                 {isRegister ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
@@ -116,8 +114,8 @@ function LoginForm() {
             </div>
 
             {!isRegister && process.env.NEXT_PUBLIC_SHOW_DEMO === "true" && (
-              <div className="mt-6 rounded-xl bg-white/5 p-4 text-xs text-muted-foreground space-y-1">
-                <p className="font-medium text-foreground">Демо-аккаунты:</p>
+              <div className="mt-6 rounded-xl bg-text/5 p-4 text-xs text-muted space-y-1">
+                <p className="font-medium text-text">Демо-аккаунты:</p>
                 <p>Admin: admin@kolos.bar / admin123</p>
                 <p>Student: student@kolos.bar / student123</p>
               </div>
@@ -133,7 +131,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center text-muted-foreground">
+        <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center text-muted">
           Загрузка…
         </div>
       }

@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Award,
+  BarChart3,
   CreditCard,
   Edit,
   FileQuestion,
+  GraduationCap,
   ImagePlus,
   MessageSquare,
   Plus,
@@ -16,9 +18,11 @@ import {
   Tag,
   Trash2,
   Users,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart } from "@/components/analytics/bar-chart";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,6 +78,25 @@ const emptyCourseForm: CourseFormState = {
   image_url: "",
 };
 
+const MONTH_LABELS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
+function revenueByMonth(payments: Payment[]) {
+  const now = new Date();
+  const months: { key: string; label: string }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: MONTH_LABELS[d.getMonth()] });
+  }
+  const totals = new Map(months.map((m) => [m.key, 0]));
+  for (const p of payments) {
+    if (p.status !== "completed") continue;
+    const d = new Date(p.created_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if (totals.has(key)) totals.set(key, (totals.get(key) || 0) + p.amount);
+  }
+  return months.map((m) => ({ label: m.label, value: totals.get(m.key) || 0 }));
+}
+
 function CourseImageField({
   value,
   onChange,
@@ -107,7 +130,7 @@ function CourseImageField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://... или загрузите файл →"
         />
-        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10">
+        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-text/10 bg-text/5 px-4 py-2.5 text-sm hover:bg-text/10">
           <ImagePlus className="h-4 w-4" />
           {uploading ? "Загрузка..." : "Файл"}
           <input
@@ -119,7 +142,7 @@ function CourseImageField({
           />
         </label>
       </div>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
       {value && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={value} alt="Превью обложки" className="mt-3 h-32 w-full rounded-xl object-cover" />
@@ -128,7 +151,7 @@ function CourseImageField({
   );
 }
 
-type Tab = "courses" | "students" | "promos" | "content" | "settings";
+type Tab = "analytics" | "courses" | "students" | "promos" | "content" | "settings";
 
 const emptySettingsForm = {
   hero_title: "",
@@ -408,7 +431,7 @@ export default function AdminPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-copper-500 border-t-transparent" />
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
   }
@@ -416,11 +439,15 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div>
-        <h1 className="text-3xl font-bold mb-2 font-[family-name:var(--font-playfair)]">Админ-панель KOLOS</h1>
-        <p className="text-muted-foreground mb-8">Управление курсами, учениками и сайтом</p>
+        <h1 className="text-3xl font-bold uppercase tracking-tight mb-2">Админ-панель KOLOS</h1>
+        <p className="text-muted mb-8">Управление курсами, учениками и сайтом</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-8">
+        <Button variant={tab === "analytics" ? "default" : "secondary"} onClick={() => setTab("analytics")}>
+          <BarChart3 className="h-4 w-4" />
+          Аналитика
+        </Button>
         <Button variant={tab === "courses" ? "default" : "secondary"} onClick={() => setTab("courses")}>
           Курсы ({courses.length})
         </Button>
@@ -441,6 +468,64 @@ export default function AdminPage() {
           Настройки сайта
         </Button>
       </div>
+
+      {tab === "analytics" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 text-muted text-sm mb-1">
+                  <Wallet className="h-4 w-4 text-accent" />
+                  Выручка
+                </div>
+                <p className="text-2xl font-bold">
+                  {formatPrice(
+                    payments
+                      .filter((p) => p.status === "completed")
+                      .reduce((sum, p) => sum + p.amount, 0)
+                  )}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 text-muted text-sm mb-1">
+                  <Users className="h-4 w-4 text-accent" />
+                  Ученики
+                </div>
+                <p className="text-2xl font-bold">{users.length}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 text-muted text-sm mb-1">
+                  <GraduationCap className="h-4 w-4 text-accent" />
+                  Курсы опубликованы
+                </div>
+                <p className="text-2xl font-bold">{courses.filter((c) => c.is_published).length}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 text-muted text-sm mb-1">
+                  <Award className="h-4 w-4 text-accent" />
+                  Сертификаты
+                </div>
+                <p className="text-2xl font-bold">{certificates.length}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Выручка по месяцам</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <BarChart data={revenueByMonth(payments)} formatValue={(v) => formatPrice(v)} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {tab === "courses" && (
         <div className="space-y-6">
@@ -477,7 +562,7 @@ export default function AdminPage() {
                     <Label htmlFor="desc">Описание</Label>
                     <textarea
                       id="desc"
-                      className="flex min-h-[100px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/50"
+                      className="flex min-h-[100px] w-full rounded-xl border border-text/10 bg-text/5 px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                       value={form.description}
                       onChange={(e) => setForm({ ...form, description: e.target.value })}
                       required
@@ -518,7 +603,7 @@ export default function AdminPage() {
                     )}
                     <div className="min-w-0">
                       <h3 className="font-medium truncate">{course.title}</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted">
                         {formatPrice(course.price)} · {course.lessons_count} уроков ·{" "}
                         {course.is_published ? "Опубликован" : "Черновик"}
                       </p>
@@ -548,7 +633,7 @@ export default function AdminPage() {
                 </div>
 
                 {editingId === course.id && (
-                  <form onSubmit={(e) => saveEditCourse(e, course.id)} className="mt-4 space-y-4 border-t border-white/10 pt-4">
+                  <form onSubmit={(e) => saveEditCourse(e, course.id)} className="mt-4 space-y-4 border-t border-text/10 pt-4">
                     <div>
                       <Label>Название</Label>
                       <Input
@@ -567,7 +652,7 @@ export default function AdminPage() {
                     <div>
                       <Label>Описание</Label>
                       <textarea
-                        className="flex min-h-[100px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-copper-500/50"
+                        className="flex min-h-[100px] w-full rounded-xl border border-text/10 bg-text/5 px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                         required
@@ -598,32 +683,32 @@ export default function AdminPage() {
       {tab === "students" && (
         <div className="space-y-10">
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Users className="h-4 w-4 text-copper-400" /> Пользователи
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <Users className="h-4 w-4 text-accent" /> Пользователи
             </h2>
             <div className="space-y-3">
               {users.map((u) => (
                 <Card key={u.id} className="flex items-center justify-between p-4">
                   <div>
                     <h3 className="font-medium">{u.full_name}</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted">
                       {u.email} · {u.role} · {u.is_active ? "Активен" : "Неактивен"}
                     </p>
                   </div>
                 </Card>
               ))}
-              {users.length === 0 && <p className="text-sm text-muted-foreground">Пока нет пользователей</p>}
+              {users.length === 0 && <p className="text-sm text-muted">Пока нет пользователей</p>}
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold mb-3">Записи на курсы</h2>
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3">Записи на курсы</h2>
             <div className="space-y-2">
               {enrollments.map((en) => (
                 <Card key={en.id} className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium">{userName(en.user_id)}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted">
                       {en.course_title} · прогресс {Math.round(en.progress_percent)}% ·{" "}
                       {new Date(en.enrolled_at).toLocaleDateString("ru-RU")}
                     </p>
@@ -633,13 +718,13 @@ export default function AdminPage() {
                   </Button>
                 </Card>
               ))}
-              {enrollments.length === 0 && <p className="text-sm text-muted-foreground">Пока никто не записан</p>}
+              {enrollments.length === 0 && <p className="text-sm text-muted">Пока никто не записан</p>}
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Award className="h-4 w-4 text-copper-400" /> Сертификаты
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <Award className="h-4 w-4 text-accent" /> Сертификаты
             </h2>
             <Card className="mb-4">
               <CardHeader><CardTitle className="text-base">Выдать сертификат вручную</CardTitle></CardHeader>
@@ -648,7 +733,7 @@ export default function AdminPage() {
                   <div>
                     <Label>Пользователь</Label>
                     <select
-                      className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm"
+                      className="flex h-11 w-full rounded-xl border border-text/10 bg-text/[0.03] px-4 text-sm"
                       value={certForm.user_id}
                       onChange={(e) => setCertForm({ ...certForm, user_id: e.target.value })}
                       required
@@ -662,7 +747,7 @@ export default function AdminPage() {
                   <div>
                     <Label>Курс</Label>
                     <select
-                      className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm"
+                      className="flex h-11 w-full rounded-xl border border-text/10 bg-text/[0.03] px-4 text-sm"
                       value={certForm.course_id}
                       onChange={(e) => setCertForm({ ...certForm, course_id: e.target.value })}
                       required
@@ -681,8 +766,8 @@ export default function AdminPage() {
               {certificates.map((cert) => (
                 <Card key={cert.id} className="flex items-center justify-between p-4">
                   <div>
-                    <span className="font-mono font-bold text-copper-400">{cert.certificate_code}</span>
-                    <p className="text-sm text-muted-foreground">
+                    <span className="font-mono font-bold text-accent">{cert.certificate_code}</span>
+                    <p className="text-sm text-muted">
                       {cert.user_name || userName(cert.user_id)} · {cert.course_title || courseName(cert.course_id)} ·{" "}
                       {new Date(cert.issued_at).toLocaleDateString("ru-RU")}
                     </p>
@@ -692,13 +777,13 @@ export default function AdminPage() {
                   </Button>
                 </Card>
               ))}
-              {certificates.length === 0 && <p className="text-sm text-muted-foreground">Сертификаты ещё не выданы</p>}
+              {certificates.length === 0 && <p className="text-sm text-muted">Сертификаты ещё не выданы</p>}
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-copper-400" /> Платежи
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-accent" /> Платежи
             </h2>
             <div className="space-y-2">
               {payments.map((p) => (
@@ -707,20 +792,20 @@ export default function AdminPage() {
                     <p className="font-medium">
                       {userName(p.user_id)} → {courseName(p.course_id)}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted">
                       {formatPrice(p.amount)}{p.discount_amount ? ` (скидка ${formatPrice(p.discount_amount)})` : ""} ·{" "}
                       {p.payment_method} · {p.status} · {new Date(p.created_at).toLocaleDateString("ru-RU")}
                     </p>
                   </div>
                 </Card>
               ))}
-              {payments.length === 0 && <p className="text-sm text-muted-foreground">Платежей пока нет</p>}
+              {payments.length === 0 && <p className="text-sm text-muted">Платежей пока нет</p>}
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-copper-400" /> Комментарии к урокам
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-accent" /> Комментарии к урокам
             </h2>
             <div className="space-y-2">
               {comments.map((c) => (
@@ -729,20 +814,20 @@ export default function AdminPage() {
                     <div className="min-w-0">
                       <p className="text-sm">
                         <span className="font-medium">{c.user_name}</span>{" "}
-                        <span className="text-muted-foreground">
+                        <span className="text-muted">
                           · {c.course_title} → {c.lesson_title} ·{" "}
                           {new Date(c.created_at).toLocaleDateString("ru-RU")}
                         </span>
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">{c.content}</p>
+                      <p className="text-sm text-muted mt-1">{c.content}</p>
                     </div>
                     <Button variant="ghost" size="icon" onClick={() => deleteCommentAdmin(c.id)}>
-                      <Trash2 className="h-4 w-4 text-red-400" />
+                      <Trash2 className="h-4 w-4 text-danger" />
                     </Button>
                   </div>
                 </Card>
               ))}
-              {comments.length === 0 && <p className="text-sm text-muted-foreground">Комментариев пока нет</p>}
+              {comments.length === 0 && <p className="text-sm text-muted">Комментариев пока нет</p>}
             </div>
           </div>
         </div>
@@ -774,8 +859,8 @@ export default function AdminPage() {
             {promos.map((p) => (
               <Card key={p.id} className="flex items-center justify-between p-4">
                 <div>
-                  <span className="font-mono font-bold text-copper-400">{p.code}</span>
-                  <p className="text-sm text-muted-foreground">
+                  <span className="font-mono font-bold text-accent">{p.code}</span>
+                  <p className="text-sm text-muted">
                     {p.discount_percent > 0 ? `${p.discount_percent}%` : `${p.discount_amount} ₽`} ·
                     использован {p.used_count}{p.max_uses ? `/${p.max_uses}` : ""} ·
                     {p.is_active ? " активен" : " неактивен"}
@@ -793,8 +878,8 @@ export default function AdminPage() {
       {tab === "content" && (
         <div className="space-y-10">
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Star className="h-4 w-4 text-copper-400" /> Отзывы на лендинге
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <Star className="h-4 w-4 text-accent" /> Отзывы на лендинге
             </h2>
             <Card className="mb-4">
               <CardHeader><CardTitle className="text-base">Новый отзыв</CardTitle></CardHeader>
@@ -845,8 +930,8 @@ export default function AdminPage() {
                 <Card key={r.id} className="flex items-start justify-between gap-4 p-4">
                   <div className="min-w-0">
                     <p className="font-medium">{r.author_name} {r.author_role && `· ${r.author_role}`}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{r.text}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm text-muted mt-1">{r.text}</p>
+                    <p className="text-xs text-muted mt-1">
                       {"★".repeat(r.rating)} · {r.is_published ? "опубликован" : "скрыт"}
                     </p>
                   </div>
@@ -860,13 +945,13 @@ export default function AdminPage() {
                   </div>
                 </Card>
               ))}
-              {reviews.length === 0 && <p className="text-sm text-muted-foreground">Отзывов пока нет</p>}
+              {reviews.length === 0 && <p className="text-sm text-muted">Отзывов пока нет</p>}
             </div>
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FileQuestion className="h-4 w-4 text-copper-400" /> Частые вопросы (FAQ)
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <FileQuestion className="h-4 w-4 text-accent" /> Частые вопросы (FAQ)
             </h2>
             <Card className="mb-4">
               <CardHeader><CardTitle className="text-base">Новый вопрос</CardTitle></CardHeader>
@@ -897,8 +982,8 @@ export default function AdminPage() {
                 <Card key={f.id} className="flex items-start justify-between gap-4 p-4">
                   <div className="min-w-0">
                     <p className="font-medium">{f.question}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{f.answer}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{f.is_published ? "опубликован" : "скрыт"}</p>
+                    <p className="text-sm text-muted mt-1">{f.answer}</p>
+                    <p className="text-xs text-muted mt-1">{f.is_published ? "опубликован" : "скрыт"}</p>
                   </div>
                   <div className="flex shrink-0 gap-2">
                     <Button variant="secondary" size="sm" onClick={() => toggleFaqPublished(f)}>
@@ -910,7 +995,7 @@ export default function AdminPage() {
                   </div>
                 </Card>
               ))}
-              {faqs.length === 0 && <p className="text-sm text-muted-foreground">Вопросов пока нет</p>}
+              {faqs.length === 0 && <p className="text-sm text-muted">Вопросов пока нет</p>}
             </div>
           </div>
         </div>
@@ -922,7 +1007,7 @@ export default function AdminPage() {
           <CardContent>
             <form onSubmit={saveSettings} className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-copper-400 mb-3">Главный экран</h3>
+                <h3 className="text-sm font-semibold text-accent mb-3">Главный экран</h3>
                 <div className="space-y-4">
                   <div>
                     <Label>Заголовок под логотипом</Label>
@@ -944,7 +1029,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-copper-400 mb-3">Баннер с промокодом</h3>
+                <h3 className="text-sm font-semibold text-accent mb-3">Баннер с промокодом</h3>
                 <div className="space-y-4">
                   <label className="flex items-center gap-2 text-sm">
                     <input
@@ -966,7 +1051,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-copper-400 mb-3">Контакты (для футера)</h3>
+                <h3 className="text-sm font-semibold text-accent mb-3">Контакты (для футера)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Email</Label>
@@ -996,7 +1081,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-copper-400 mb-3">Соцсети (ссылки, для футера)</h3>
+                <h3 className="text-sm font-semibold text-accent mb-3">Соцсети (ссылки, для футера)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Instagram</Label>
@@ -1034,7 +1119,7 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-copper-400 mb-3">Футер и SEO</h3>
+                <h3 className="text-sm font-semibold text-accent mb-3">Футер и SEO</h3>
                 <div className="space-y-4">
                   <div>
                     <Label>Строка копирайта в футере</Label>
@@ -1065,7 +1150,7 @@ export default function AdminPage() {
 
               <div className="flex items-center gap-3">
                 <Button type="submit">Сохранить настройки</Button>
-                {settingsSaved && <span className="text-sm text-copper-400">Сохранено ✓</span>}
+                {settingsSaved && <span className="text-sm text-accent">Сохранено ✓</span>}
               </div>
             </form>
           </CardContent>

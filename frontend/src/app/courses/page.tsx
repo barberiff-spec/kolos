@@ -16,10 +16,10 @@ export default async function CoursesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold mb-3 font-[family-name:var(--font-playfair)]">
+        <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-3">
           Каталог курсов
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted">
           {courses.length} {courses.length === 1 ? "курс" : "курсов"} для барберов
         </p>
       </div>
@@ -32,8 +32,8 @@ export default async function CoursesPage() {
         </div>
       ) : (
         <div className="premium-card text-center py-16">
-          <p className="text-muted-foreground text-lg">Курсы пока не добавлены</p>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-muted text-lg">Курсы пока не добавлены</p>
+          <p className="text-sm text-muted mt-2">
             Загляните позже — каталог скоро пополнится
           </p>
         </div>
