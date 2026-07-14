@@ -6,11 +6,12 @@
 
 | | URL |
 |---|-----|
-| **Сайт** | https://frontend-blond-one-25.vercel.app |
-| **API** | через туннель с Mac (пока Mac включён) |
-| **Админка** | `/admin` → admin@kolos.bar / admin123 |
+| **Сайт** | https://kolos-academy.ru |
+| **API** | https://api.kolos-academy.ru |
+| **Админка** | https://kolos-academy.ru/admin → admin@kolos.bar / admin123 |
 
-Постоянный backend без Mac: [DEPLOY-GITHUB.md](./DEPLOY-GITHUB.md) (GitHub + Render).
+Прод развёрнут на VPS **Selectel** (Docker: frontend + backend + PostgreSQL, HTTPS через Caddy/Let's Encrypt).
+Инструкция по продакшену: [DEPLOY-SELECTEL.md](./DEPLOY-SELECTEL.md).
 
 ## Возможности v2.0
 
@@ -99,7 +100,8 @@ Webhook URL: `https://your-api.com/api/v1/payments/webhook/yookassa`
 
 | Инструкция | Для кого |
 |------------|----------|
-| **[DEPLOY-RU.md](./DEPLOY-RU.md)** | **Россия — Timeweb, Amvera, ЮKassa** |
+| **[DEPLOY-SELECTEL.md](./DEPLOY-SELECTEL.md)** | **Текущий прод — Selectel VPS + Docker + Caddy** |
+| [DEPLOY-RU.md](./DEPLOY-RU.md) | Россия — Timeweb, Amvera, ЮKassa |
 | [DEPLOY-GITHUB.md](./DEPLOY-GITHUB.md) | Render / Vercel (зарубеж) |
 | [LAUNCH.md](./LAUNCH.md) | Docker prod, чеклист |
 
