@@ -12,7 +12,7 @@ from app.core.security import (
 )
 from app.db.session import get_db
 from app.models import RefreshToken, User, UserRole
-from app.schemas.user import LoginRequest, TokenResponse, UserCreate, UserRead
+from app.schemas.user import AccountUpdateRequest, LoginRequest, TokenResponse, UserCreate, UserRead
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -112,4 +112,29 @@ def logout(
 
 @router.get("/me", response_model=UserRead)
 def me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserRead)
+def update_me(
+    payload: AccountUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный текущий пароль")
+
+    if payload.email is None and payload.new_password is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Нечего обновлять")
+
+    if payload.email and payload.email != current_user.email:
+        if db.query(User).filter(User.email == payload.email, User.id != current_user.id).first():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email уже используется")
+        current_user.email = payload.email
+
+    if payload.new_password:
+        current_user.hashed_password = get_password_hash(payload.new_password)
+
+    db.commit()
+    db.refresh(current_user)
     return current_user

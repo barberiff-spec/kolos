@@ -3,15 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { BookOpen, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
-import type { Enrollment } from "@/lib/types";
+import type { Enrollment, User } from "@/lib/types";
 
 function initials(name: string | undefined) {
   if (!name) return "K";
@@ -25,11 +27,50 @@ function initials(name: string | undefined) {
 
 export default function CabinetPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading, user, setUser } = useAuthStore();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [lessonReminders, setLessonReminders] = useState(true);
+
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [accountError, setAccountError] = useState("");
+  const [accountSuccess, setAccountSuccess] = useState("");
+  const [savingAccount, setSavingAccount] = useState(false);
+
+  async function handleAccountSubmit(e: FormEvent) {
+    e.preventDefault();
+    setAccountError("");
+    setAccountSuccess("");
+
+    const emailChanged = newEmail.trim() && newEmail.trim() !== user?.email;
+    if (!emailChanged && !newPassword) {
+      setAccountError("Измените email или укажите новый пароль");
+      return;
+    }
+
+    setSavingAccount(true);
+    try {
+      const { data } = await api.patch<User>("/auth/me", {
+        current_password: currentPassword,
+        ...(emailChanged ? { email: newEmail.trim() } : {}),
+        ...(newPassword ? { new_password: newPassword } : {}),
+      });
+      setUser(data);
+      setAccountSuccess("Данные обновлены");
+      setCurrentPassword("");
+      setNewEmail("");
+      setNewPassword("");
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setAccountError(typeof detail === "string" ? detail : "Не удалось обновить данные");
+    } finally {
+      setSavingAccount(false);
+    }
+  }
 
   useEffect(() => {
     if (isLoading) return;
@@ -89,6 +130,59 @@ export default function CabinetPage() {
               </div>
               <Switch checked={lessonReminders} onCheckedChange={setLessonReminders} />
             </div>
+          </div>
+
+          <div className="border-t border-border/20 pt-6">
+            <button
+              type="button"
+              onClick={() => setAccountOpen((v) => !v)}
+              className="text-sm text-accent hover:underline"
+            >
+              {accountOpen ? "Скрыть настройки входа" : "Изменить email или пароль"}
+            </button>
+
+            {accountOpen && (
+              <form onSubmit={handleAccountSubmit} className="mt-4 space-y-4 max-w-sm">
+                <div>
+                  <Label htmlFor="new-email">Новый email</Label>
+                  <Input
+                    id="new-email"
+                    type="email"
+                    placeholder={user?.email}
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="new-password">Новый пароль</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Оставьте пустым, чтобы не менять"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    minLength={6}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="current-password">Текущий пароль</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {accountError && <p className="text-sm text-danger">{accountError}</p>}
+                {accountSuccess && <p className="text-sm text-accent">{accountSuccess}</p>}
+
+                <Button type="submit" disabled={savingAccount}>
+                  {savingAccount ? "Сохраняем..." : "Сохранить"}
+                </Button>
+              </form>
+            )}
           </div>
         </CardContent>
       </Card>

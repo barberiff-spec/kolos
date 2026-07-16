@@ -45,3 +45,9 @@ class TokenResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class AccountUpdateRequest(BaseModel):
+    current_password: str
+    email: EmailStr | None = None
+    new_password: str | None = Field(default=None, min_length=6, max_length=128)
