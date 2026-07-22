@@ -146,3 +146,8 @@ class BotTestSubmitResponse(BaseModel):
     passed: bool
     passing_score: int
     results: list[BotTestResultItem]
+
+
+class BotDailyTip(BaseModel):
+    id: int
+    text: str

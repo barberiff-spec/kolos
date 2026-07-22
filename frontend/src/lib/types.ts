@@ -172,6 +172,14 @@ export interface FAQ {
   created_at: string;
 }
 
+export interface DailyTip {
+  id: number;
+  text: string;
+  order: number;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface PromoValidateResponse {
   code: string;
   original_price: number;

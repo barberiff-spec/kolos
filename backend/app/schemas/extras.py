@@ -139,6 +139,28 @@ class FAQRead(BaseModel):
     created_at: datetime
 
 
+class DailyTipCreate(BaseModel):
+    text: str = Field(min_length=5)
+    order: int = 0
+    is_active: bool = True
+
+
+class DailyTipUpdate(BaseModel):
+    text: str | None = Field(default=None, min_length=5)
+    order: int | None = None
+    is_active: bool | None = None
+
+
+class DailyTipRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    text: str
+    order: int
+    is_active: bool
+    created_at: datetime
+
+
 class SiteSettingsUpdate(BaseModel):
     hero_title: str | None = Field(default=None, max_length=255)
     hero_subtitle: str | None = None

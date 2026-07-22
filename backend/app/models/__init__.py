@@ -378,6 +378,18 @@ class TestOption(Base):
     question: Mapped["TestQuestion"] = relationship(back_populates="options")
 
 
+class DailyTip(Base):
+    """Совет дня, который Kolos Bot рассылает активным ученикам по расписанию."""
+
+    __tablename__ = "daily_tips"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class TestAttempt(Base):
     """Попытка сдачи теста. Пересдачи не ограничены — храним всю историю."""
 

@@ -3,8 +3,18 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_admin
 from app.db.session import get_db
-from app.models import FAQ, Review, User
-from app.schemas.extras import FAQCreate, FAQRead, FAQUpdate, ReviewCreate, ReviewRead, ReviewUpdate
+from app.models import FAQ, DailyTip, Review, User
+from app.schemas.extras import (
+    DailyTipCreate,
+    DailyTipRead,
+    DailyTipUpdate,
+    FAQCreate,
+    FAQRead,
+    FAQUpdate,
+    ReviewCreate,
+    ReviewRead,
+    ReviewUpdate,
+)
 
 router = APIRouter(prefix="/content", tags=["Content"])
 
@@ -92,4 +102,44 @@ def delete_faq(faq_id: int, db: Session = Depends(get_db), _: User = Depends(get
     if not faq:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="FAQ not found")
     db.delete(faq)
+    db.commit()
+
+
+@router.get("/daily-tips", response_model=list[DailyTipRead])
+def list_daily_tips(db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    return db.query(DailyTip).order_by(DailyTip.order, DailyTip.id).all()
+
+
+@router.post("/daily-tips", response_model=DailyTipRead, status_code=status.HTTP_201_CREATED)
+def create_daily_tip(payload: DailyTipCreate, db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    tip = DailyTip(**payload.model_dump())
+    db.add(tip)
+    db.commit()
+    db.refresh(tip)
+    return tip
+
+
+@router.patch("/daily-tips/{tip_id}", response_model=DailyTipRead)
+def update_daily_tip(
+    tip_id: int,
+    payload: DailyTipUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_admin),
+):
+    tip = db.get(DailyTip, tip_id)
+    if not tip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Daily tip not found")
+    for key, value in payload.model_dump(exclude_unset=True).items():
+        setattr(tip, key, value)
+    db.commit()
+    db.refresh(tip)
+    return tip
+
+
+@router.delete("/daily-tips/{tip_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_daily_tip(tip_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_admin)):
+    tip = db.get(DailyTip, tip_id)
+    if not tip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Daily tip not found")
+    db.delete(tip)
     db.commit()

@@ -11,6 +11,7 @@ import {
   FileQuestion,
   GraduationCap,
   ImagePlus,
+  Lightbulb,
   MessageSquare,
   Plus,
   Settings as SettingsIcon,
@@ -33,6 +34,7 @@ import type {
   Certificate,
   CommentAdmin,
   CourseListItem,
+  DailyTip,
   Enrollment,
   FAQ,
   Payment,
@@ -181,6 +183,7 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [dailyTips, setDailyTips] = useState<DailyTip[]>([]);
   const [comments, setComments] = useState<CommentAdmin[]>([]);
   const [tab, setTab] = useState<Tab>("courses");
   const [showForm, setShowForm] = useState(false);
@@ -191,6 +194,7 @@ export default function AdminPage() {
   const [certForm, setCertForm] = useState({ user_id: "", course_id: "" });
   const [reviewForm, setReviewForm] = useState({ author_name: "", author_role: "", rating: "5", text: "" });
   const [faqForm, setFaqForm] = useState({ question: "", answer: "" });
+  const [tipForm, setTipForm] = useState({ text: "" });
   const [settingsForm, setSettingsForm] = useState(emptySettingsForm);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -213,6 +217,7 @@ export default function AdminPage() {
       paymentsRes,
       reviewsRes,
       faqsRes,
+      dailyTipsRes,
       commentsRes,
       settingsRes,
     ] = await Promise.all([
@@ -224,6 +229,7 @@ export default function AdminPage() {
       api.get<Payment[]>("/payments"),
       api.get<Review[]>("/content/reviews?published_only=false"),
       api.get<FAQ[]>("/content/faq?published_only=false"),
+      api.get<DailyTip[]>("/content/daily-tips"),
       api.get<CommentAdmin[]>("/comments"),
       api.get<SiteSettings>("/settings"),
     ]);
@@ -235,6 +241,7 @@ export default function AdminPage() {
     setPayments(paymentsRes.data);
     setReviews(reviewsRes.data);
     setFaqs(faqsRes.data);
+    setDailyTips(dailyTipsRes.data);
     setComments(commentsRes.data);
     setSettingsForm({
       hero_title: settingsRes.data.hero_title || "",
@@ -403,6 +410,28 @@ export default function AdminPage() {
     loadData();
   };
 
+  const createDailyTip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await api.post("/content/daily-tips", {
+      text: tipForm.text,
+      order: dailyTips.length,
+      is_active: true,
+    });
+    setTipForm({ text: "" });
+    loadData();
+  };
+
+  const toggleDailyTipActive = async (tip: DailyTip) => {
+    await api.patch(`/content/daily-tips/${tip.id}`, { is_active: !tip.is_active });
+    loadData();
+  };
+
+  const deleteDailyTip = async (id: number) => {
+    if (!confirm("Удалить совет?")) return;
+    await api.delete(`/content/daily-tips/${id}`);
+    loadData();
+  };
+
   const saveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     await api.put("/settings", {
@@ -461,7 +490,7 @@ export default function AdminPage() {
         </Button>
         <Button variant={tab === "content" ? "default" : "secondary"} onClick={() => setTab("content")}>
           <Star className="h-4 w-4" />
-          Отзывы и FAQ
+          Отзывы, FAQ и советы
         </Button>
         <Button variant={tab === "settings" ? "default" : "secondary"} onClick={() => setTab("settings")}>
           <SettingsIcon className="h-4 w-4" />
@@ -996,6 +1025,50 @@ export default function AdminPage() {
                 </Card>
               ))}
               {faqs.length === 0 && <p className="text-sm text-muted">Вопросов пока нет</p>}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-accent" /> Советы дня (Kolos Bot)
+            </h2>
+            <p className="text-sm text-muted mb-3">
+              Рассылаются раз в день ученикам, которые уже проявляли активность в боте. Активные советы ротируются по дням.
+            </p>
+            <Card className="mb-4">
+              <CardHeader><CardTitle className="text-base">Новый совет</CardTitle></CardHeader>
+              <CardContent>
+                <form onSubmit={createDailyTip} className="space-y-4">
+                  <div>
+                    <Label>Текст совета</Label>
+                    <Textarea
+                      value={tipForm.text}
+                      onChange={(e) => setTipForm({ text: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <Button type="submit">Добавить совет</Button>
+                </form>
+              </CardContent>
+            </Card>
+            <div className="space-y-2">
+              {dailyTips.map((t) => (
+                <Card key={t.id} className="flex items-start justify-between gap-4 p-4">
+                  <div className="min-w-0">
+                    <p className="text-sm">{t.text}</p>
+                    <p className="text-xs text-muted mt-1">{t.is_active ? "активен" : "выключен"}</p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => toggleDailyTipActive(t)}>
+                      {t.is_active ? "Выключить" : "Включить"}
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => deleteDailyTip(t.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+              {dailyTips.length === 0 && <p className="text-sm text-muted">Советов пока нет</p>}
             </div>
           </div>
         </div>

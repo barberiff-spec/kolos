@@ -15,6 +15,7 @@ user_id — эндпоинт сам резолвит telegram_id -> User и 404-
 """
 
 import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
@@ -27,6 +28,7 @@ from app.core.security import verify_token
 from app.db.session import get_db
 from app.models import (
     Course,
+    DailyTip,
     Enrollment,
     Lesson,
     LessonProgress,
@@ -42,6 +44,7 @@ from app.models import (
 )
 from app.schemas.telegram import (
     BotAccessResponse,
+    BotDailyTip,
     BotLessonRead,
     BotModuleItem,
     BotModuleLessonItem,
@@ -421,6 +424,50 @@ def submit_test(test_id: int, payload: BotTestSubmit, db: Session = Depends(get_
         record_activity(db, user)
 
     return BotTestSubmitResponse(score=score, passed=passed, passing_score=test.passing_score, results=results)
+
+
+# ---- Рассылки (совет дня, реактивация) --------------------------------------
+
+
+@router.get("/telegram/tips/today", response_model=BotDailyTip)
+def get_today_tip(db: Session = Depends(get_db)):
+    """Один и тот же совет для всех на протяжении дня — детерминированная
+    ротация по номеру дня (UTC), без отдельного состояния "что уже отправляли"."""
+    tips = db.query(DailyTip).filter(DailyTip.is_active.is_(True)).order_by(DailyTip.order, DailyTip.id).all()
+    if not tips:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No active daily tips")
+
+    today_ordinal = datetime.now(timezone.utc).date().toordinal()
+    tip = tips[today_ordinal % len(tips)]
+    return BotDailyTip(id=tip.id, text=tip.text)
+
+
+@router.get("/telegram/broadcast/active-users", response_model=list[int])
+def get_active_broadcast_users(db: Session = Depends(get_db)):
+    """telegram_id учеников, которые хоть раз проявили активность (есть Streak) —
+    получатели «совета дня»."""
+    rows = (
+        db.query(User.telegram_id)
+        .join(Streak, Streak.user_id == User.id)
+        .filter(User.telegram_id.isnot(None))
+        .all()
+    )
+    return [row[0] for row in rows]
+
+
+@router.get("/telegram/broadcast/reactivation-candidates", response_model=list[int])
+def get_reactivation_candidates(db: Session = Depends(get_db)):
+    """telegram_id тех, у кого сегодня ровно 3 дня без активности — рассылка
+    реактивации шлётся один раз за счёт точного совпадения (не >=), так что
+    здесь не нужно хранить отдельный флаг "уже отправляли"."""
+    target_date = datetime.now(timezone.utc).date() - timedelta(days=3)
+    rows = (
+        db.query(User.telegram_id)
+        .join(Streak, Streak.user_id == User.id)
+        .filter(User.telegram_id.isnot(None), Streak.last_active_date == target_date)
+        .all()
+    )
+    return [row[0] for row in rows]
 
 
 # ---- Заглушки будущих фаз ---------------------------------------------------
