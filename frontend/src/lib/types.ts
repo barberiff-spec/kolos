@@ -33,6 +33,31 @@ export interface Module {
   lessons: Lesson[];
 }
 
+export interface TestOption {
+  id: number;
+  question_id: number;
+  text: string;
+  is_correct: boolean;
+  order: number;
+}
+
+export interface TestQuestion {
+  id: number;
+  test_id: number;
+  text: string;
+  order: number;
+  options: TestOption[];
+}
+
+export interface Test {
+  id: number;
+  module_id: number;
+  title: string;
+  passing_score: number;
+  created_at: string;
+  questions: TestQuestion[];
+}
+
 export interface Course {
   id: number;
   title: string;

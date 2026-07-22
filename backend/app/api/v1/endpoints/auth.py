@@ -6,6 +6,7 @@ from app.core.deps import REFRESH_COOKIE, get_current_user
 from app.core.security import (
     create_access_token,
     create_refresh_token,
+    create_telegram_link_token,
     get_password_hash,
     verify_password,
     verify_token,
@@ -113,6 +114,16 @@ def logout(
 @router.get("/me", response_model=UserRead)
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/telegram-link-token")
+def get_telegram_link_token(current_user: User = Depends(get_current_user)):
+    """Токен для кнопки «Подключить Telegram»: фронт строит deep-link
+    вида https://t.me/<bot_username>?start=<token>, бот передаёт токен
+    в POST /api/telegram/link при команде /start.
+    """
+    token = create_telegram_link_token(str(current_user.id))
+    return {"token": token, "expires_in_minutes": 10}
 
 
 @router.patch("/me", response_model=UserRead)

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 
-from app.models import Course, Enrollment, Lesson, LessonProgress, Module, User
+from app.models import Course, Enrollment, Lesson, LessonProgress, Module, Test, TestAttempt, User
 
 
 def slugify(text: str) -> str:
@@ -23,6 +23,44 @@ def user_has_enrollment(db: Session, user_id: int, course_id: int) -> bool:
         .first()
         is not None
     )
+
+
+def get_module_test_map(db: Session, module_ids: list[int]) -> dict[int, Test]:
+    """module_id -> Test для модулей, у которых есть тест."""
+    if not module_ids:
+        return {}
+    tests = db.query(Test).filter(Test.module_id.in_(module_ids)).all()
+    return {test.module_id: test for test in tests}
+
+
+def get_passed_test_ids(db: Session, user_id: int, test_ids: list[int]) -> set[int]:
+    """test_id тех тестов, по которым у пользователя есть хотя бы одна зачётная попытка."""
+    if not test_ids:
+        return set()
+    rows = (
+        db.query(TestAttempt.test_id)
+        .filter(
+            TestAttempt.user_id == user_id,
+            TestAttempt.test_id.in_(test_ids),
+            TestAttempt.passed.is_(True),
+        )
+        .distinct()
+        .all()
+    )
+    return {row[0] for row in rows}
+
+
+def is_module_passed(
+    module: Module,
+    completed_lesson_ids: set[int],
+    test_by_module: dict[int, Test],
+    passed_test_ids: set[int],
+) -> bool:
+    """Модуль пройден = все уроки completed И (нет теста ИЛИ есть зачётная попытка)."""
+    if not module.lessons or not all(lesson.id in completed_lesson_ids for lesson in module.lessons):
+        return False
+    test = test_by_module.get(module.id)
+    return test is None or test.id in passed_test_ids
 
 
 def recalculate_course_progress(db: Session, user_id: int, course_id: int) -> float:
@@ -49,6 +87,26 @@ def recalculate_course_progress(db: Session, user_id: int, course_id: int) -> fl
         .count()
     )
     progress = round((completed / len(lesson_ids)) * 100, 2)
+
+    if progress >= 100:
+        completed_ids = {
+            row[0]
+            for row in db.query(LessonProgress.lesson_id).filter(
+                LessonProgress.user_id == user_id,
+                LessonProgress.lesson_id.in_(lesson_ids),
+                LessonProgress.completed.is_(True),
+            )
+        }
+        module_ids = [module.id for module in course.modules]
+        test_by_module = get_module_test_map(db, module_ids)
+        passed_test_ids = get_passed_test_ids(db, user_id, [test.id for test in test_by_module.values()])
+        all_modules_passed = all(
+            is_module_passed(module, completed_ids, test_by_module, passed_test_ids) for module in course.modules
+        )
+        if not all_modules_passed:
+            # Все уроки пройдены, но есть непройденный тест модуля — прогресс не должен
+            # достигать 100%, иначе issue_certificate_if_completed выдаст сертификат раньше времени.
+            progress = 99.99
 
     enrollment = (
         db.query(Enrollment)

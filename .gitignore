@@ -48,3 +48,6 @@ frontend/.env.production
 # Deploy CLI cache
 .vercel
 .railway
+
+# Runtime uploads (bot submissions, etc.)
+backend/uploads/

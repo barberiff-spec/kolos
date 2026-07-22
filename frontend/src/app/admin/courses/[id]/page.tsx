@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
-import type { Course, Lesson, Module, VideoType } from "@/lib/types";
+import type { Course, Lesson, Module, Test, TestOption, TestQuestion, VideoType } from "@/lib/types";
 
 export default function AdminCourseEditorPage() {
   const params = useParams();
@@ -22,6 +22,7 @@ export default function AdminCourseEditorPage() {
   const [expandedModule, setExpandedModule] = useState<number | null>(null);
   const [editingModuleId, setEditingModuleId] = useState<number | null>(null);
   const [moduleTitleDraft, setModuleTitleDraft] = useState("");
+  const [testsByModule, setTestsByModule] = useState<Record<number, Test | null>>({});
 
   useEffect(() => {
     if (isLoading) return;
@@ -35,7 +36,10 @@ export default function AdminCourseEditorPage() {
   const loadCourse = async () => {
     const { data } = await api.get<Course>(`/courses/${courseId}`);
     setCourse(data);
-    if (data.modules?.length) setExpandedModule(data.modules[0].id);
+    if (data.modules?.length) {
+      setExpandedModule(data.modules[0].id);
+      loadTest(data.modules[0].id);
+    }
   };
 
   const addModule = async () => {
@@ -62,6 +66,78 @@ export default function AdminCourseEditorPage() {
   const updateLesson = async (lesson: Lesson, field: string, value: string | number) => {
     await api.patch(`/lessons/${lesson.id}`, { [field]: value });
     loadCourse();
+  };
+
+  const loadTest = async (moduleId: number) => {
+    const { data } = await api.get<Test[]>("/tests", { params: { module_id: moduleId } });
+    setTestsByModule((prev) => ({ ...prev, [moduleId]: data[0] || null }));
+  };
+
+  const addTest = async (moduleId: number) => {
+    const title = prompt("Название теста:", "Тест по модулю");
+    if (!title) return;
+    await api.post("/tests", { module_id: moduleId, title, passing_score: 70 });
+    loadTest(moduleId);
+  };
+
+  const updateTest = async (test: Test, field: "title" | "passing_score", value: string | number) => {
+    await api.patch(`/tests/${test.id}`, { [field]: value });
+    loadTest(test.module_id);
+  };
+
+  const deleteTest = async (test: Test) => {
+    if (!confirm("Удалить тест вместе со всеми вопросами?")) return;
+    await api.delete(`/tests/${test.id}`);
+    setTestsByModule((prev) => ({ ...prev, [test.module_id]: null }));
+  };
+
+  const addQuestion = async (test: Test) => {
+    const text = prompt("Текст вопроса:");
+    if (!text) return;
+    await api.post("/test-questions", { test_id: test.id, text, order: test.questions.length });
+    loadTest(test.module_id);
+  };
+
+  const updateQuestion = async (question: TestQuestion, moduleId: number, text: string) => {
+    await api.patch(`/test-questions/${question.id}`, { text });
+    loadTest(moduleId);
+  };
+
+  const deleteQuestion = async (question: TestQuestion, moduleId: number) => {
+    if (!confirm("Удалить вопрос?")) return;
+    await api.delete(`/test-questions/${question.id}`);
+    loadTest(moduleId);
+  };
+
+  const addOption = async (question: TestQuestion, moduleId: number) => {
+    const text = prompt("Текст варианта ответа:");
+    if (!text) return;
+    await api.post("/test-options", {
+      question_id: question.id,
+      text,
+      is_correct: false,
+      order: question.options.length,
+    });
+    loadTest(moduleId);
+  };
+
+  const updateOptionText = async (option: TestOption, moduleId: number, text: string) => {
+    await api.patch(`/test-options/${option.id}`, { text });
+    loadTest(moduleId);
+  };
+
+  const deleteOption = async (option: TestOption, moduleId: number) => {
+    await api.delete(`/test-options/${option.id}`);
+    loadTest(moduleId);
+  };
+
+  const setCorrectOption = async (question: TestQuestion, option: TestOption, moduleId: number) => {
+    const previous = question.options.find((o) => o.is_correct && o.id !== option.id);
+    await Promise.all([
+      api.patch(`/test-options/${option.id}`, { is_correct: true }),
+      ...(previous ? [api.patch(`/test-options/${previous.id}`, { is_correct: false })] : []),
+    ]);
+    loadTest(moduleId);
   };
 
   const deleteModule = async (id: number) => {
@@ -138,7 +214,12 @@ export default function AdminCourseEditorPage() {
           <Card key={module.id} className="border-accent/10 overflow-hidden">
             <CardHeader
               className="cursor-pointer flex flex-row items-center justify-between py-4 bg-text/[0.02]"
-              onClick={() => editingModuleId !== module.id && setExpandedModule(expandedModule === module.id ? null : module.id)}
+              onClick={() => {
+                if (editingModuleId === module.id) return;
+                const next = expandedModule === module.id ? null : module.id;
+                setExpandedModule(next);
+                if (next !== null && !(next in testsByModule)) loadTest(next);
+              }}
             >
               <CardTitle className="text-base flex items-center gap-2 min-w-0 flex-1">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent text-sm">
@@ -289,6 +370,104 @@ export default function AdminCourseEditorPage() {
                 <Button variant="secondary" size="sm" onClick={() => addLesson(module.id)}>
                   <Plus className="h-4 w-4" /> Добавить урок
                 </Button>
+
+                <div className="pt-4 border-t border-text/10">
+                  <h3 className="text-sm font-semibold text-text mb-3">Тест модуля</h3>
+                  {testsByModule[module.id] === undefined ? (
+                    <p className="text-sm text-muted">Загрузка…</p>
+                  ) : testsByModule[module.id] === null ? (
+                    <Button variant="secondary" size="sm" onClick={() => addTest(module.id)}>
+                      <Plus className="h-4 w-4" /> Добавить тест
+                    </Button>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-end gap-3">
+                        <div className="flex-1">
+                          <Label>Название теста</Label>
+                          <Input
+                            defaultValue={testsByModule[module.id]!.title}
+                            onBlur={(e) =>
+                              e.target.value !== testsByModule[module.id]!.title &&
+                              updateTest(testsByModule[module.id]!, "title", e.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="w-32">
+                          <Label>Проходной балл, %</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={100}
+                            defaultValue={testsByModule[module.id]!.passing_score}
+                            onBlur={(e) =>
+                              updateTest(testsByModule[module.id]!, "passing_score", parseInt(e.target.value) || 70)
+                            }
+                          />
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => deleteTest(testsByModule[module.id]!)}>
+                          <Trash2 className="h-4 w-4 text-danger" />
+                        </Button>
+                      </div>
+
+                      {testsByModule[module.id]!.questions.map((question, qi) => (
+                        <div key={question.id} className="rounded-xl border border-text/5 p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-accent">Вопрос {qi + 1}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteQuestion(question, module.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-danger" />
+                            </Button>
+                          </div>
+                          <Textarea
+                            defaultValue={question.text}
+                            onBlur={(e) =>
+                              e.target.value !== question.text &&
+                              updateQuestion(question, module.id, e.target.value)
+                            }
+                          />
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted">Отметь правильный вариант кружком слева</p>
+                            {question.options.map((option) => (
+                              <div key={option.id} className="flex items-center gap-2">
+                                <input
+                                  type="radio"
+                                  name={`correct-${question.id}`}
+                                  checked={option.is_correct}
+                                  onChange={() => setCorrectOption(question, option, module.id)}
+                                  className="h-4 w-4 shrink-0 accent-accent"
+                                />
+                                <Input
+                                  defaultValue={option.text}
+                                  onBlur={(e) =>
+                                    e.target.value !== option.text &&
+                                    updateOptionText(option, module.id, e.target.value)
+                                  }
+                                  className="flex-1"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => deleteOption(option, module.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-danger" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button variant="secondary" size="sm" onClick={() => addOption(question, module.id)}>
+                              <Plus className="h-4 w-4" /> Добавить вариант
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button variant="secondary" size="sm" onClick={() => addQuestion(testsByModule[module.id]!)}>
+                        <Plus className="h-4 w-4" /> Добавить вопрос
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             )}
           </Card>

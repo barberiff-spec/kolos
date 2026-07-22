@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
     algorithm: str = "HS256"
 
+    # Отдельный секрет для service-to-service токена бота — намеренно не переиспользует
+    # secret_key пользовательских токенов, чтобы утечка одного не компрометировала другой.
+    service_jwt_secret: str = "change-me-to-a-different-long-random-secret-in-production"
+    service_token_expire_days: int = 365
+
     cors_origins: Annotated[List[str], NoDecode] = ["http://localhost:3001"]
 
     cookie_secure: bool = False
@@ -47,6 +52,9 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3001"
 
     upload_dir: str = "uploads"
+
+    # Лимит бесплатных разборов фото в день для Kolos Bot (см. GET /telegram/users/{id}/access)
+    default_daily_submission_limit: int = 3
 
     # Email (optional — logs to console if not configured)
     smtp_host: str | None = None

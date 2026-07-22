@@ -1,13 +1,16 @@
 import enum
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
+    Date,
     DateTime,
     Enum,
     Float,
     ForeignKey,
     Integer,
+    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -16,6 +19,15 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+
+def _enum_values(enum_cls: type[enum.Enum]) -> list[str]:
+    """SQLAlchemy Enum() без values_callable хранит ИМЯ члена enum ("ADMIN"),
+    а миграции (alembic/versions/001_initial_schema.py) создали Postgres-типы
+    со значениями в нижнем регистре ("admin"). values_callable выравнивает
+    ORM с уже накатанной схемой БД.
+    """
+    return [member.value for member in enum_cls]
 
 
 class UserRole(str, enum.Enum):
@@ -43,8 +55,11 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.STUDENT, nullable=False)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole, values_callable=_enum_values), default=UserRole.STUDENT, nullable=False
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    telegram_id: Mapped[int | None] = mapped_column(BigInteger, unique=True, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -118,7 +133,9 @@ class Lesson(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str | None] = mapped_column(Text)
     video_url: Mapped[str | None] = mapped_column(String(500))
-    video_type: Mapped[VideoType] = mapped_column(Enum(VideoType), default=VideoType.NONE, nullable=False)
+    video_type: Mapped[VideoType] = mapped_column(
+        Enum(VideoType, values_callable=_enum_values), default=VideoType.NONE, nullable=False
+    )
     order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     duration_minutes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -153,7 +170,9 @@ class Payment(Base):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     discount_amount: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     promo_code: Mapped[str | None] = mapped_column(String(50))
-    status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.PENDING, nullable=False)
+    status: Mapped[PaymentStatus] = mapped_column(
+        Enum(PaymentStatus, values_callable=_enum_values), default=PaymentStatus.PENDING, nullable=False
+    )
     payment_method: Mapped[str] = mapped_column(String(50), default="mock", nullable=False)
     external_id: Mapped[str | None] = mapped_column(String(255))
     payment_url: Mapped[str | None] = mapped_column(String(500))
@@ -268,3 +287,109 @@ class SiteSettings(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class Submission(Base):
+    """Разбор домашней работы (фото), сделанный Kolos Bot через Gemini Vision.
+
+    Сам AI-анализ выполняется на стороне бота — сюда попадает уже готовый
+    результат, эндпоинт только сохраняет его и отдаёт историю.
+    """
+
+    __tablename__ = "submissions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    lesson_id: Mapped[int | None] = mapped_column(ForeignKey("lessons.id", ondelete="SET NULL"), nullable=True)
+    photo_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    scores: Mapped[dict] = mapped_column(JSON, nullable=False)
+    overall: Mapped[float] = mapped_column(Float, nullable=False)
+    strengths: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    issues: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    priority_next_step: Mapped[str] = mapped_column(Text, nullable=False)
+    verdict: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship()
+    lesson: Mapped["Lesson | None"] = relationship()
+
+
+class Streak(Base):
+    """Трекер ежедневной активности ученика (стрик).
+
+    Одна запись на пользователя. Обновляется через streak_service.record_activity()
+    при значимых действиях (прошёл урок, сдал фото на разбор) — и на сайте, и в боте.
+    """
+
+    __tablename__ = "streaks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
+    current_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    longest_streak: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    last_active_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    user: Mapped["User"] = relationship()
+
+
+class Test(Base):
+    """Тест модуля. Один тест на модуль — сдан = все вопросы пройдены с проходным баллом."""
+
+    __tablename__ = "tests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    module_id: Mapped[int] = mapped_column(ForeignKey("modules.id", ondelete="CASCADE"), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    passing_score: Mapped[int] = mapped_column(Integer, default=70, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    module: Mapped["Module"] = relationship()
+    questions: Mapped[list["TestQuestion"]] = relationship(
+        back_populates="test", cascade="all, delete-orphan", order_by="TestQuestion.order"
+    )
+
+
+class TestQuestion(Base):
+    __tablename__ = "test_questions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    test_id: Mapped[int] = mapped_column(ForeignKey("tests.id", ondelete="CASCADE"), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    test: Mapped["Test"] = relationship(back_populates="questions")
+    options: Mapped[list["TestOption"]] = relationship(
+        back_populates="question", cascade="all, delete-orphan", order_by="TestOption.order"
+    )
+
+
+class TestOption(Base):
+    __tablename__ = "test_options"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    question_id: Mapped[int] = mapped_column(ForeignKey("test_questions.id", ondelete="CASCADE"), nullable=False)
+    text: Mapped[str] = mapped_column(String(500), nullable=False)
+    is_correct: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    question: Mapped["TestQuestion"] = relationship(back_populates="options")
+
+
+class TestAttempt(Base):
+    """Попытка сдачи теста. Пересдачи не ограничены — храним всю историю."""
+
+    __tablename__ = "test_attempts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    test_id: Mapped[int] = mapped_column(ForeignKey("tests.id", ondelete="CASCADE"), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+    passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    answers: Mapped[dict] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    user: Mapped["User"] = relationship()
+    test: Mapped["Test"] = relationship()

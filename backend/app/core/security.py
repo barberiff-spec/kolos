@@ -57,6 +57,49 @@ def create_refresh_token(subject: str) -> tuple[str, str]:
     return token, jti
 
 
+def create_telegram_link_token(user_id: str) -> str:
+    """Одноразовый короткоживущий токен для deep-link связки Telegram (/start=<token>).
+
+    Подписан обычным secret_key (это обычный пользовательский flow — токен
+    выдаётся залогиненному на сайте пользователю), но с type="telegram_link",
+    поэтому не пройдёт как access/refresh токен и не даёт доступа ни к чему,
+    кроме самой привязки.
+    """
+    return _create_token(
+        subject=user_id,
+        expires_delta=timedelta(minutes=10),
+        token_type="telegram_link",
+    )
+
+
+def create_service_token(subject: str = "kolos-bot") -> str:
+    """Токен для service-to-service вызовов (например, Kolos Bot).
+
+    Подписан отдельным секретом (service_jwt_secret), а не secret_key
+    пользовательских токенов, и не проходит verify_token() для типов
+    access/refresh — это исключает случайное принятие сервисного токена
+    обычными user-эндпоинтами и наоборот.
+    """
+    now = datetime.now(timezone.utc)
+    payload: dict[str, Any] = {
+        "sub": subject,
+        "type": "service",
+        "iat": now,
+        "exp": now + timedelta(days=settings.service_token_expire_days),
+    }
+    return jwt.encode(payload, settings.service_jwt_secret, algorithm=settings.algorithm)
+
+
+def verify_service_token(token: str) -> dict[str, Any] | None:
+    try:
+        payload = jwt.decode(token, settings.service_jwt_secret, algorithms=[settings.algorithm])
+        if payload.get("type") != "service":
+            return None
+        return payload
+    except JWTError:
+        return None
+
+
 def decode_token(token: str) -> dict[str, Any]:
     return jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
 

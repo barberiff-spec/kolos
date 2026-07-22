@@ -9,6 +9,7 @@ from app.models import Course, Lesson, LessonProgress, Module, User
 from app.schemas.enrollment import LessonProgressRead, LessonProgressUpdate
 from app.services.certificate_service import issue_certificate_if_completed
 from app.services.course_service import recalculate_course_progress, user_has_enrollment
+from app.services.streak_service import record_activity
 
 router = APIRouter(prefix="/progress", tags=["Progress"])
 
@@ -74,4 +75,5 @@ def update_lesson_progress(
     recalculate_course_progress(db, current_user.id, course_id)
     if payload.completed:
         issue_certificate_if_completed(db, current_user.id, course_id)
+        record_activity(db, current_user)
     return progress

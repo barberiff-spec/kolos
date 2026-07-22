@@ -2,7 +2,7 @@ from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.core.security import verify_token
+from app.core.security import verify_service_token, verify_token
 from app.db.session import get_db
 from app.models import User, UserRole
 
@@ -46,6 +46,28 @@ def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return current_user
+
+
+def get_service_caller(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+) -> str:
+    """Авторизация для service-to-service вызовов (Kolos Bot).
+
+    Намеренно НЕ принимает cookie и НЕ переиспользует get_current_user —
+    сервисный токен подписан отдельным секретом и имеет type="service",
+    поэтому не может быть подменён обычным пользовательским access-токеном
+    и наоборот. Подключать эту зависимость нужно только к эндпоинтам,
+    предназначенным для бота (app/api/v1/endpoints/telegram.py), а не к
+    общим user/admin-роутам.
+    """
+    if not credentials or not credentials.credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Service token required")
+
+    payload = verify_service_token(credentials.credentials)
+    if not payload:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired service token")
+
+    return payload["sub"]
 
 
 def get_optional_user(

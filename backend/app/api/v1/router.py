@@ -13,6 +13,8 @@ from app.api.v1.endpoints import (
     progress,
     promos,
     settings,
+    telegram,
+    tests,
     uploads,
     users,
 )
@@ -32,3 +34,5 @@ api_router.include_router(promos.router)
 api_router.include_router(content.router)
 api_router.include_router(settings.router)
 api_router.include_router(uploads.router)
+api_router.include_router(tests.router)
+api_router.include_router(telegram.router)
