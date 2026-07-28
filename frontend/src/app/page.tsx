@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Award, BookOpen, Play, Scissors, Sparkles, Star } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles, Star } from "lucide-react";
+import { CourseCard } from "@/components/courses/course-card";
 import { PromoBanner } from "@/components/landing/promo-banner";
 import { serverFetch } from "@/lib/server-api";
 import { formatPrice } from "@/lib/utils";
@@ -9,6 +10,12 @@ const DEFAULT_HERO_TITLE = "Академия барберинга нового �
 const DEFAULT_HERO_SUBTITLE =
   "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
   "и работа с инструментами — обучение от мастеров премиальных барбершопов.";
+
+const HERO_CALLOUTS = [
+  { label: "Стрижки и фейды", style: "top-[8%] left-[6%] md:left-[10%]" },
+  { label: "Бритьё и уход за бородой", style: "top-[42%] right-[6%] md:right-[10%]" },
+  { label: "Сертификат по итогам курса", style: "bottom-[10%] left-[8%] md:left-[14%]" },
+];
 
 async function getData() {
   const [courses, reviews, faqs, settings] = await Promise.all([
@@ -25,61 +32,93 @@ async function getData() {
   };
 }
 
-const btn =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium h-12 px-8";
-const btnPrimary =
-  `${btn} bg-accent text-bg shadow-card transition-all duration-200 ease-out hover:brightness-105 active:brightness-90`;
-const btnOutline =
-  `${btn} border border-border bg-transparent text-text transition-all duration-200 ease-out hover:bg-text/5 hover:border-accent/40`;
-
 export default async function HomePage() {
   const { courses, reviews, faqs, settings } = await getData();
   const minPrice = courses.length > 0 ? Math.min(...courses.map((c) => c.price)) : null;
   const heroTitle = settings?.hero_title || DEFAULT_HERO_TITLE;
   const heroSubtitle = settings?.hero_subtitle || DEFAULT_HERO_SUBTITLE;
+  const heroImage = courses[0]?.image_url;
 
   return (
     <div>
-      <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 py-24 md:py-36 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 rounded-full glass px-5 py-2 text-sm text-accent mb-8 border border-accent/20">
-              <Sparkles className="h-4 w-4" />
-              {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
+      <section className="container mx-auto px-4 pt-10 md:pt-16">
+        <div className="rounded-[var(--radius-lg)] border border-border bg-surface overflow-hidden">
+          {/* Top bar: eyebrow badge left, small course thumbnails right — split by the same
+              vertical line that runs through the whole hero. */}
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="flex items-center px-6 md:px-10 py-6 md:border-r border-border">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
+                <Sparkles className="h-3.5 w-3.5" />
+                {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
+              </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-tight mb-6">
-              <span className="gradient-text">KOLOS</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted mb-4 font-light tracking-wide">
-              {heroTitle}
-            </p>
-            <p className="text-base text-muted/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-              {heroSubtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/courses" className={btnPrimary}>
-                Смотреть курсы
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link href="/auth/login?mode=register" className={btnOutline}>
-                <Play className="h-5 w-5" />
-                Зарегистрироваться
-              </Link>
+            <div className="hidden md:flex items-center justify-end gap-3 px-10 py-6">
+              {courses.slice(0, 2).map((c) => (
+                <div
+                  key={c.id}
+                  className="h-14 w-14 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0"
+                >
+                  {c.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.image_url} alt="" className="h-full w-full object-cover" />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24 max-w-4xl mx-auto">
-            {[
-              { icon: Scissors, title: "Стрижки и фейды", desc: "Низкий, средний, под кожу и классика" },
-              { icon: Award, title: "Бритьё и борода", desc: "Горячие полотенца, контуринг, уход" },
-              { icon: Sparkles, title: "Премиальный формат", desc: "Видеоуроки, сертификаты, прогресс" },
-            ].map((item) => (
-              <div key={item.title} className="premium-card text-center border-accent/10">
-                <item.icon className="h-8 w-8 text-accent mx-auto mb-3" />
-                <h3 className="font-semibold mb-1 text-accent">{item.title}</h3>
-                <p className="text-sm text-muted">{item.desc}</p>
+          {/* Photo straddling the vertical divider, with thin leader-line callouts —
+              the annotated-product-shot motif, applied to a barbershop photo. */}
+          <div className="relative mx-6 md:mx-10 aspect-[16/9] md:aspect-[21/9] rounded-[var(--radius-md)] overflow-hidden bg-surface-2">
+            {heroImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover grayscale" />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-border/40 to-surface-2" />
+            )}
+            <div className="hidden md:block">
+              {HERO_CALLOUTS.map((c) => (
+                <span
+                  key={c.label}
+                  className={`absolute ${c.style} rounded-full bg-surface/90 border border-border px-3 py-1 text-xs text-text backdrop-blur-sm`}
+                >
+                  {c.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Text zone: left = eyebrow + short statement, right = big two-tone headline —
+              same bottom-anchored split as the reference. */}
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="flex items-end px-6 md:px-10 py-10 md:py-14 md:border-r border-border">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted mb-3">Академия KOLOS</p>
+                <p className="text-lg md:text-xl font-bold leading-snug max-w-sm">{heroTitle}</p>
               </div>
-            ))}
+            </div>
+            <div className="px-6 md:px-10 py-10 md:py-14">
+              <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight leading-[0.95] mb-5">
+                KOLOS <span className="text-muted">Барбершоп</span>
+              </h1>
+              <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
+            </div>
+          </div>
+
+          {/* Bottom CTA bar. */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 md:px-10 py-6 border-t border-border">
+            <Link
+              href="/courses"
+              className="group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse"
+            >
+              <span className="font-medium">Смотреть курсы</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+            <Link href="/auth/login?mode=register" className="text-sm font-medium underline underline-offset-4">
+              Регистрация
+            </Link>
           </div>
         </div>
       </section>
@@ -103,38 +142,7 @@ export default async function HomePage() {
         {courses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course) => (
-              <Link key={course.id} href={`/course/${course.id}`} className="block h-full">
-                <article className="premium-card overflow-hidden p-0 h-full border-accent/10">
-                  <div className="relative aspect-video overflow-hidden bg-bg">
-                    {course.image_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={course.image_url}
-                        alt={course.title}
-                        className="absolute inset-0 h-full w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-border/20 to-bg" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/20 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="inline-block rounded-full bg-accent/90 px-3 py-1 text-sm font-semibold text-bg border border-accent/30">
-                        {formatPrice(course.price)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">{course.title}</h3>
-                    <p className="text-sm text-muted line-clamp-2 mb-4">{course.short_description}</p>
-                    <p className="flex items-center gap-1 text-xs text-muted">
-                      <BookOpen className="h-3.5 w-3.5 text-accent" />
-                      {course.lessons_count} уроков
-                    </p>
-                  </div>
-                </article>
-              </Link>
+              <CourseCard key={course.id} course={course} />
             ))}
           </div>
         ) : (
@@ -145,21 +153,21 @@ export default async function HomePage() {
       </section>
 
       {reviews.length > 0 && (
-        <section className="container mx-auto px-4 py-20 border-t border-accent/10">
+        <section className="container mx-auto px-4 py-20 border-t border-border">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold uppercase tracking-tight mb-3">Отзывы барберов</h2>
             <p className="text-muted">Те, кто уже прошёл KOLOS</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {reviews.map((review) => (
-              <article key={review.id} className="premium-card border-accent/10">
+              <article key={review.id} className="premium-card">
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: review.rating }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-accent text-accent" />
+                    <Star key={j} className="h-4 w-4 fill-text text-text" />
                   ))}
                 </div>
                 <p className="text-muted leading-relaxed mb-6">&ldquo;{review.text}&rdquo;</p>
-                <p className="font-semibold text-accent">{review.author_name}</p>
+                <p className="font-semibold text-text">{review.author_name}</p>
                 {review.author_role && (
                   <p className="text-xs text-muted mt-0.5">{review.author_role}</p>
                 )}
@@ -177,7 +185,7 @@ export default async function HomePage() {
           </div>
           <div className="max-w-2xl mx-auto space-y-3">
             {faqs.map((faq) => (
-              <details key={faq.id} className="premium-card border-accent/10 group" open={faq.id === faqs[0]?.id}>
+              <details key={faq.id} className="premium-card group" open={faq.id === faqs[0]?.id}>
                 <summary className="cursor-pointer list-none font-medium p-5 [&::-webkit-details-marker]:hidden">
                   {faq.question}
                 </summary>

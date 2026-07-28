@@ -8,21 +8,16 @@ export function PremiumBackground() {
           its own GPU compositing layer, preventing it from repainting (and
           briefly flickering/whiting-out) every time the page scrolls. */}
       <div className="absolute inset-0 bg-bg" />
-      {/* Fine grain over the black base — reads as brushed metal / textured
-          paper instead of a flat, cheap-looking solid fill. */}
-      <div className="absolute inset-0 noise-texture opacity-[0.22] mix-blend-screen" />
+      {/* Fine grain over the light gray base — mix-blend-multiply so it reads
+          as subtle texture (darkening) rather than washing out on a light fill. */}
+      <div className="absolute inset-0 noise-texture opacity-[0.15] mix-blend-multiply" />
       <div
-        className="absolute inset-0 opacity-[0.35]"
+        className="absolute inset-0 opacity-[0.5]"
         style={{
-          backgroundImage: `
-            radial-gradient(ellipse 90% 60% at 50% -25%, rgb(var(--accent) / 0.14), transparent 55%),
-            radial-gradient(ellipse 50% 40% at 0% 40%, rgb(var(--text-muted) / 0.07), transparent 50%),
-            radial-gradient(ellipse 45% 35% at 100% 60%, rgb(var(--accent-deep) / 0.12), transparent 45%)
-          `,
+          backgroundImage: `radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--text) / 0.05), transparent 55%)`,
         }}
       />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-border/30 to-transparent" />
-      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-bg to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
     </div>
   );
 }

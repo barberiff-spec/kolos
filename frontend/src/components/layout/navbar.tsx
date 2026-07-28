@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Award, BookOpen, LayoutDashboard, LogIn, LogOut, Menu, User, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { KolosLogo } from "@/components/KolosLogo";
 import { useAuthStore } from "@/store/auth";
 import { cn } from "@/lib/utils";
@@ -28,10 +29,10 @@ export function Navbar() {
   });
 
   return (
-    <header className="sticky top-0 z-50 border-b border-accent/10 glass">
+    <header className="sticky top-0 z-50 border-b border-border glass">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3 group">
-          <KolosLogo size={24} className="text-accent group-hover:scale-105 transition-transform" />
+          <KolosLogo size={24} className="text-text group-hover:scale-105 transition-transform" />
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold tracking-[0.2em] gradient-text">KOLOS</span>
             <span className="text-[10px] text-muted tracking-widest uppercase">Академия барберов</span>
@@ -46,7 +47,7 @@ export function Navbar() {
               className={cn(
                 "flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-all duration-200 ease-out",
                 pathname.startsWith(link.href)
-                  ? "bg-accent/10 text-accent border border-accent/20"
+                  ? "bg-inverse text-on-inverse"
                   : "text-muted hover:text-text hover:bg-text/5"
               )}
             >
@@ -82,18 +83,18 @@ export function Navbar() {
           )}
         </div>
 
-        <button
+        <IconButton
           type="button"
-          className="md:hidden p-2"
+          className="md:hidden"
           aria-label="Меню"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </IconButton>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-accent/10 p-4 space-y-2">
+        <div className="md:hidden border-t border-border p-4 space-y-2">
           {visibleLinks.map((link) => (
             <Link
               key={link.href}

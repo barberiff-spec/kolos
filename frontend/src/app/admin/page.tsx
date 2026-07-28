@@ -890,7 +890,7 @@ export default function AdminPage() {
                 <div>
                   <span className="font-mono font-bold text-accent">{p.code}</span>
                   <p className="text-sm text-muted">
-                    {p.discount_percent > 0 ? `${p.discount_percent}%` : `${p.discount_amount} ₽`} ·
+                    {p.discount_percent > 0 ? `${p.discount_percent}%` : formatPrice(p.discount_amount)} ·
                     использован {p.used_count}{p.max_uses ? `/${p.max_uses}` : ""} ·
                     {p.is_active ? " активен" : " неактивен"}
                   </p>

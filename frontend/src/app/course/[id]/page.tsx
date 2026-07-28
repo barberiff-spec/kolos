@@ -194,11 +194,11 @@ export default function CoursePage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-24">
             <CardContent className="p-6 space-y-6">
-              <div className="text-3xl font-bold gradient-text">
+              <div className="text-3xl font-bold text-text">
                 {formatPrice(promoApplied ? promoApplied.final_price : course.price)}
               </div>
               {promoApplied && (
-                <p className="text-sm text-accent">
+                <p className="text-sm text-muted">
                   Скидка {formatPrice(promoApplied.discount)} применена
                 </p>
               )}

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Footer } from "@/components/layout/footer";
@@ -8,6 +9,12 @@ import { Splash } from "@/components/layout/splash";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { serverFetch } from "@/lib/server-api";
 import type { SiteSettings } from "@/lib/types";
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "700", "800"],
+  variable: "--font-manrope",
+});
 
 const DEFAULT_TITLE = "KOLOS — Академия барберов";
 const DEFAULT_DESCRIPTION =
@@ -29,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#0F1219", // --bg
+  themeColor: "#F0F0F0", // --bg
   width: "device-width",
   initialScale: 1,
   // Lets content extend under the iPhone notch/home indicator instead of
@@ -58,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await serverFetch<SiteSettings>("/settings");
 
   return (
-    <html lang="ru" className="dark">
+    <html lang="ru" className={manrope.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: SW_CLEANUP }} />
       </head>

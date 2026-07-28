@@ -4,22 +4,28 @@
 
 @layer base {
   :root {
-    /* Teal design tokens — RGB channels (identical to the hex below).
-       Channel form keeps Tailwind alpha utilities working: bg-accent/40 etc. */
-    --bg: 15 18 25;             /* #0F1219  глубокий чёрный, основной фон */
-    --surface: 26 31 43;        /* #1A1F2B  карточки, панели, модалки, инпуты */
-    --accent: 18 168 157;       /* #12A89D  бирюзовый — CTA, иконки, выделения */
-    --accent-deep: 13 115 106;  /* #0D736A  тёмно-бирюзовый — hover, вторичные кнопки */
-    --text: 245 245 245;        /* #F5F5F5  заголовки и основной контент */
-    --text-muted: 188 195 208;  /* #BCC3D0  подписи, disabled, вспомогательный текст */
-    --border: 110 122 145;      /* #6E7A91  границы, разделители */
-    --danger: 239 68 68;        /* #EF4444  текст ошибок на тёмном фоне */
-    --danger-strong: 220 38 38; /* #DC2626  фон кнопки удаления под белым текстом */
-    --radius-sm: 12px;
-    --radius-md: 16px;
-    --radius-lg: 20px;
-    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
+    /* Monochrome design tokens — RGB channels (identical to the hex below).
+       Channel form keeps Tailwind alpha utilities working: bg-inverse/40 etc. */
+    --bg: 240 240 240;           /* #F0F0F0  светло-серый, основной фон */
+    --surface: 255 255 255;      /* #FFFFFF  карточки, панели, модалки, инпуты */
+    --surface-2: 226 226 226;    /* #E2E2E2  вторичные блоки, hover */
+    --text: 20 20 20;            /* #141414  заголовки и основной контент */
+    --text-muted: 105 105 105;   /* #696969  подписи, disabled, второе слово заголовка (4.8:1 на --bg, проходит WCAG AA) */
+    --border: 214 214 214;       /* #D6D6D6  границы, разделители */
+    --inverse: 20 20 20;         /* #141414  заливка чёрных пилюль/кнопок */
+    --on-inverse: 255 255 255;   /* #FFFFFF  текст на инверсной заливке */
+    --charcoal: 42 42 42;        /* #2A2A2A  тёмные секции-плашки (footer CTA и т.п.) */
+    /* accent сохранён как алиас на inverse, чтобы ~90 существующих text-accent/
+       bg-accent остались монохромными без точечной правки каждого места */
+    --accent: 20 20 20;
+    --accent-deep: 120 120 120;
+    --danger: 220 38 38;         /* #DC2626  текст ошибок */
+    --danger-strong: 185 28 28;  /* #B91C1C  фон кнопки удаления под белым текстом */
+    --radius-sm: 14px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    --shadow-card: 0 2px 12px rgba(20, 20, 20, 0.06);
+    --shadow-elevated: 0 12px 32px rgba(20, 20, 20, 0.10);
   }
 
   * {
@@ -30,7 +36,32 @@
     @apply bg-bg text-text antialiased;
     min-height: 100vh;
     min-height: 100dvh;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Lucide renders every icon at stroke-width 2 by default — thin it out
+     to match the hairline icon style of the reference. */
+  .lucide {
+    stroke-width: 1.5px;
+  }
+
+  /* KolosLogo self-drawing animation (splash screen). Each <path> has
+     pathLength=1 + stroke-dasharray=1, so this offset sweep is duration-
+     independent of actual path length. */
+  @keyframes kolos-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .kolos-draw {
+    animation-name: kolos-draw;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kolos-draw {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
   }
 }
 
@@ -47,21 +78,21 @@
 
   @media (min-width: 768px) {
     .glass {
-      @apply bg-surface/60 backdrop-blur-xl;
+      @apply bg-surface/80 backdrop-blur-xl;
     }
   }
 
   .glass-hover {
-    @apply transition-colors duration-300 hover:bg-accent/[0.06] hover:border-accent/30;
+    @apply transition-colors duration-300 hover:bg-surface-2/60 hover:border-text/20;
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-text via-muted to-accent-deep bg-clip-text text-transparent;
+    @apply text-text;
   }
 
   .premium-card {
-    /* card: --surface fill, hairline text-tinted border, 16px radius, soft black shadow, 24px padding */
-    @apply bg-surface border border-text/[0.06] rounded-[var(--radius-md)] p-6 shadow-card glass-hover;
+    /* card: --surface fill, hairline border, large radius, soft shadow, 24px padding */
+    @apply bg-surface border border-border rounded-[var(--radius-lg)] p-6 shadow-card glass-hover;
   }
 
   .card-glow {
@@ -89,5 +120,5 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--accent) / 0.4);
+  background: rgb(var(--text) / 0.3);
 }

@@ -1,8 +1,8 @@
 import { writeFile } from "node:fs/promises";
 import { ImageResponse } from "../node_modules/next/dist/compiled/@vercel/og/index.node.js";
 
-const BG = "#0F1219";
-const ACCENT = "#12A89D";
+const BG = "#F0F0F0";
+const ACCENT = "#141414";
 const NATIVE_STROKE = 7; // svg units, matches KolosLogo.tsx at viewBox 120x200
 const MIN_RENDERED_PX = 2; // floor so thin strokes stay legible at small sizes
 
