@@ -24,7 +24,7 @@ function SuccessContent() {
       <Card className="border-accent/20 text-center">
         <CardContent className="p-10 space-y-6">
           <CheckCircle2 className="h-16 w-16 text-accent mx-auto" />
-          <h1 className="text-2xl font-bold uppercase tracking-tight">Оплата успешна!</h1>
+          <h1 className="text-3xl font-extrabold uppercase tracking-tight">Оплата успешна!</h1>
           <p className="text-muted">Доступ к курсу открыт. Можете начать обучение прямо сейчас.</p>
           <div className="flex flex-col gap-3">
             {courseId && (

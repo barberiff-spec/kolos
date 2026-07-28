@@ -24,8 +24,18 @@
     --radius-sm: 14px;
     --radius-md: 20px;
     --radius-lg: 28px;
-    --shadow-card: 0 2px 12px rgba(20, 20, 20, 0.06);
-    --shadow-elevated: 0 12px 32px rgba(20, 20, 20, 0.10);
+    /* Layered like real cast light: a tight contact shadow + a soft diffuse
+       throw. A single soft shadow reads flat; two stacked shadows read
+       like an object actually sitting above the surface. */
+    --shadow-card:
+      0 1px 2px rgba(20, 20, 20, 0.04),
+      0 8px 20px -4px rgba(20, 20, 20, 0.10),
+      0 24px 48px -12px rgba(20, 20, 20, 0.12);
+    --shadow-elevated:
+      0 2px 4px rgba(20, 20, 20, 0.05),
+      0 16px 32px -8px rgba(20, 20, 20, 0.14),
+      0 40px 80px -16px rgba(20, 20, 20, 0.18);
+    --shadow-inverse: 0 16px 40px -12px rgba(20, 20, 20, 0.35);
   }
 
   * {
@@ -90,13 +100,30 @@
     @apply text-text;
   }
 
+  /* Lift on hover: shadow deepens and the card rises 3px. Timing matches
+     the shadow-card transition so the two read as one motion. */
+  .hover-lift {
+    @apply transition-[transform,box-shadow] duration-300 ease-out;
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-elevated);
+  }
+
   .premium-card {
     /* card: --surface fill, hairline border, large radius, soft shadow, 24px padding */
-    @apply bg-surface border border-border rounded-[var(--radius-lg)] p-6 shadow-card glass-hover;
+    @apply bg-surface border border-border/60 rounded-[var(--radius-lg)] p-6 shadow-card glass-hover hover-lift;
   }
 
   .card-glow {
     box-shadow: var(--shadow-card);
+  }
+
+  /* Shared photo treatment: desaturated + slight contrast/brightness push
+     so grayscale reads as deliberate and moody rather than a flat, washed-
+     out "no color" filter. Applied to every course/product photo. */
+  .photo-mono {
+    filter: grayscale(1) contrast(1.15) brightness(0.95);
   }
 
   .noise-texture {

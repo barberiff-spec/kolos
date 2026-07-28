@@ -42,7 +42,7 @@ export default function CertificatesPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div>
-        <h1 className="text-3xl font-bold uppercase tracking-tight mb-2">Мои сертификаты</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-2">Мои сертификаты</h1>
         <p className="text-muted mb-4">Выдаются после 100% прохождения курса</p>
         <Link href="/certificates/verify" className="text-sm text-accent hover:underline inline-flex items-center gap-1 mb-10">
           Проверить сертификат по номеру

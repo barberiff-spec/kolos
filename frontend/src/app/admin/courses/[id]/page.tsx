@@ -206,7 +206,7 @@ export default function AdminCourseEditorPage() {
         <ArrowLeft className="h-4 w-4" /> Назад в админку
       </Link>
 
-      <h1 className="text-2xl font-bold mb-2">{course.title}</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">{course.title}</h1>
       <p className="text-muted mb-8">Редактор модулей и уроков</p>
 
       <div className="space-y-4">

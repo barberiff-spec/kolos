@@ -26,6 +26,7 @@ const config: Config = {
       boxShadow: {
         card: "var(--shadow-card)",
         elevated: "var(--shadow-elevated)",
+        inverse: "var(--shadow-inverse)",
       },
       borderRadius: {
         lg: "var(--radius-lg)",

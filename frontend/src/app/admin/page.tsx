@@ -468,7 +468,7 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div>
-        <h1 className="text-3xl font-bold uppercase tracking-tight mb-2">Админ-панель KOLOS</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-2">Админ-панель KOLOS</h1>
         <p className="text-muted mb-8">Управление курсами, учениками и сайтом</p>
       </div>
 
@@ -712,7 +712,7 @@ export default function AdminPage() {
       {tab === "students" && (
         <div className="space-y-10">
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <Users className="h-4 w-4 text-accent" /> Пользователи
             </h2>
             <div className="space-y-3">
@@ -731,7 +731,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3">Записи на курсы</h2>
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3">Записи на курсы</h2>
             <div className="space-y-2">
               {enrollments.map((en) => (
                 <Card key={en.id} className="flex items-center justify-between p-4">
@@ -752,7 +752,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <Award className="h-4 w-4 text-accent" /> Сертификаты
             </h2>
             <Card className="mb-4">
@@ -811,7 +811,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-accent" /> Платежи
             </h2>
             <div className="space-y-2">
@@ -833,7 +833,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-accent" /> Комментарии к урокам
             </h2>
             <div className="space-y-2">
@@ -907,7 +907,7 @@ export default function AdminPage() {
       {tab === "content" && (
         <div className="space-y-10">
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <Star className="h-4 w-4 text-accent" /> Отзывы на лендинге
             </h2>
             <Card className="mb-4">
@@ -979,7 +979,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <FileQuestion className="h-4 w-4 text-accent" /> Частые вопросы (FAQ)
             </h2>
             <Card className="mb-4">
@@ -1029,7 +1029,7 @@ export default function AdminPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold uppercase tracking-tight mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold uppercase tracking-tight mb-3 flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-accent" /> Советы дня (Kolos Bot)
             </h2>
             <p className="text-sm text-muted mb-3">

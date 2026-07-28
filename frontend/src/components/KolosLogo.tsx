@@ -3,6 +3,8 @@ interface KolosLogoProps {
   className?: string;
   /** Draw the mark stroke-by-stroke instead of rendering it fully formed. Used on the splash screen. */
   animate?: boolean;
+  /** Stroke weight of the mark. Defaults to the heavy brand weight. */
+  strokeWidth?: number;
 }
 
 // Stem → top leaf → outer arcs → grain pairs, bottom pair first (sprouting upward).
@@ -23,7 +25,12 @@ const PATHS = [
   "M60 112 C74 112 86 100 87 80", // верхняя пара зёрен — правое
 ];
 
-export function KolosLogo({ size = 120, className = "", animate = false }: KolosLogoProps) {
+export function KolosLogo({
+  size = 120,
+  className = "",
+  animate = false,
+  strokeWidth = 11,
+}: KolosLogoProps) {
   return (
     <svg
       width={size}
@@ -31,7 +38,7 @@ export function KolosLogo({ size = 120, className = "", animate = false }: Kolos
       viewBox="0 0 120 200"
       fill="none"
       stroke="currentColor"
-      strokeWidth={7}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}

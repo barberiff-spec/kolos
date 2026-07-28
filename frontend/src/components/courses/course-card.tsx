@@ -22,7 +22,7 @@ export function CourseCard({ course }: CourseCardProps) {
             <img
               src={course.image_url}
               alt={course.title}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover photo-mono transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
               decoding="async"
             />

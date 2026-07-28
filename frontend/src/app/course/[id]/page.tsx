@@ -142,16 +142,16 @@ export default function CoursePage() {
           <div>
             {course.image_url && (
               <div className="relative aspect-video rounded-2xl overflow-hidden mb-6">
-                <Image src={course.image_url} alt={course.title} fill className="object-cover" />
+                <Image src={course.image_url} alt={course.title} fill className="object-cover photo-mono" />
                 <div className="absolute inset-0 bg-gradient-to-t from-bg/60 to-transparent" />
               </div>
             )}
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">{course.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">{course.title}</h1>
             <p className="text-muted text-lg leading-relaxed">{course.description}</p>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-2xl font-semibold uppercase tracking-tight">Программа курса</h2>
+            <h2 className="text-2xl font-bold uppercase tracking-tight">Программа курса</h2>
             {course.modules?.map((module, mi) => (
               <Card key={module.id} className="p-0 overflow-hidden">
                 <CardHeader className="bg-text/[0.02] border-b border-text/5 py-4">

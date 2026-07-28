@@ -32,9 +32,9 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border glass">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3 group">
-          <KolosLogo size={24} className="text-text group-hover:scale-105 transition-transform" />
+          <KolosLogo size={32} className="text-text group-hover:scale-105 transition-transform" />
           <div className="flex flex-col leading-none">
-            <span className="text-xl font-bold tracking-[0.2em] gradient-text">KOLOS</span>
+            <span className="text-2xl font-extrabold tracking-[0.12em]">KOLOS</span>
             <span className="text-[10px] text-muted tracking-widest uppercase">Академия барберов</span>
           </div>
         </Link>

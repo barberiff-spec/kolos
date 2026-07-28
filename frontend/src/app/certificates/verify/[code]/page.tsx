@@ -38,7 +38,7 @@ export default function CertificateVerifyResultPage() {
         <Card className="text-center border-danger/20">
           <CardContent className="p-10 space-y-4">
             <XCircle className="h-14 w-14 text-danger mx-auto" />
-            <h1 className="text-xl font-bold uppercase tracking-tight">Сертификат не найден</h1>
+            <h1 className="text-2xl font-extrabold uppercase tracking-tight">Сертификат не найден</h1>
             <p className="text-muted text-sm">
               Проверьте номер или обратитесь к выпускнику KOLOS
             </p>
@@ -59,7 +59,7 @@ export default function CertificateVerifyResultPage() {
           <CheckCircle2 className="h-14 w-14 text-accent mx-auto" />
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-accent mb-2">KOLOS Barber Academy</p>
-            <h1 className="text-2xl font-bold uppercase tracking-tight">Сертификат подлинный</h1>
+            <h1 className="text-3xl font-extrabold uppercase tracking-tight">Сертификат подлинный</h1>
           </div>
           <Award className="h-10 w-10 text-accent mx-auto" />
           <div className="space-y-1">

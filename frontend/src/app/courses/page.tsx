@@ -16,7 +16,7 @@ export default async function CoursesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold uppercase tracking-tight mb-3">
+        <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-3">
           Каталог курсов
         </h1>
         <p className="text-muted">

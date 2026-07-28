@@ -96,13 +96,13 @@ export default function CabinetPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div>
-        <h1 className="text-3xl font-bold uppercase tracking-tight mb-2">Личный кабинет</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-2">Личный кабинет</h1>
         <p className="text-muted mb-10">
           Добро пожаловать, {user?.full_name}
         </p>
       </div>
 
-      <h2 className="text-xl font-semibold uppercase tracking-tight mb-6">Профиль</h2>
+      <h2 className="text-2xl font-bold uppercase tracking-tight mb-6">Профиль</h2>
       <Card className="mb-10">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-4">
@@ -187,7 +187,7 @@ export default function CabinetPage() {
         </CardContent>
       </Card>
 
-      <h2 className="text-xl font-semibold uppercase tracking-tight mb-6">Мои курсы</h2>
+      <h2 className="text-2xl font-bold uppercase tracking-tight mb-6">Мои курсы</h2>
 
       {enrollments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -200,7 +200,7 @@ export default function CabinetPage() {
                       src={enrollment.course_image_url}
                       alt={enrollment.course_title}
                       fill
-                      className="object-cover"
+                      className="object-cover photo-mono"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-border/20 to-surface/20" />

@@ -13,7 +13,7 @@ export default async function MobileHomePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold uppercase tracking-tight mb-3 text-text">KOLOS</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-3 text-text">KOLOS</h1>
         <p className="text-muted mb-6">Академия барберинга</p>
         <div className="flex flex-col gap-3 max-w-xs mx-auto">
           <Link
@@ -33,7 +33,7 @@ export default async function MobileHomePage() {
 
       {courses.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold uppercase tracking-tight">Курсы</h2>
+          <h2 className="text-2xl font-bold uppercase tracking-tight">Курсы</h2>
           {courses.map((course) => (
             <Link key={course.id} href={`/course/${course.id}`} className="block premium-card">
               <p className="font-semibold text-text">{course.title}</p>

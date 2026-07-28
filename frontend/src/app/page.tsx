@@ -9,7 +9,7 @@ import type { CourseListItem, FAQ, Review, SiteSettings } from "@/lib/types";
 const DEFAULT_HERO_TITLE = "Академия барберинга нового уровня";
 const DEFAULT_HERO_SUBTITLE =
   "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
-  "и работа с инструментами — обучение от мастеров премиальных барбершопов.";
+  "и работа с инструментами — обучение от мастеров элитных студий барберинга.";
 
 const HERO_CALLOUTS = [
   { label: "Стрижки и фейды", style: "top-[8%] left-[6%] md:left-[10%]" },
@@ -41,38 +41,35 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="container mx-auto px-4 pt-10 md:pt-16">
-        <div className="rounded-[var(--radius-lg)] border border-border bg-surface overflow-hidden">
-          {/* Top bar: eyebrow badge left, small course thumbnails right — split by the same
-              vertical line that runs through the whole hero. */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="flex items-center px-6 md:px-10 py-6 md:border-r border-border">
-              <div className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
-                <Sparkles className="h-3.5 w-3.5" />
-                {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
-              </div>
-            </div>
-            <div className="hidden md:flex items-center justify-end gap-3 px-10 py-6">
-              {courses.slice(0, 2).map((c) => (
-                <div
-                  key={c.id}
-                  className="h-14 w-14 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0"
-                >
-                  {c.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.image_url} alt="" className="h-full w-full object-cover" />
-                  )}
-                </div>
-              ))}
+      {/* Split hero: a black backdrop cut into rounded white cells by a real gutter,
+          the photo laid in its own full-width row so it visually crosses the seam —
+          the signature move of the reference. Plain grid rows, no absolute-position
+          overlays, so nothing can ever overlap regardless of content or viewport. */}
+      <section className="bg-inverse px-3 py-3 md:px-4 md:py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          {/* Top row: eyebrow badge (left) / mini course thumbnails (right). */}
+          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-4 flex items-center">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
+              <Sparkles className="h-3.5 w-3.5" />
+              {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
             </div>
           </div>
+          <div className="hidden md:flex bg-surface rounded-[var(--radius-lg)] px-10 pt-9 pb-4 items-center justify-end gap-3">
+            {courses.slice(0, 2).map((c) => (
+              <div key={c.id} className="h-12 w-12 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0">
+                {c.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={c.image_url} alt="" className="h-full w-full object-cover photo-mono" />
+                )}
+              </div>
+            ))}
+          </div>
 
-          {/* Photo straddling the vertical divider, with thin leader-line callouts —
-              the annotated-product-shot motif, applied to a barbershop photo. */}
-          <div className="relative mx-6 md:mx-10 aspect-[16/9] md:aspect-[21/9] rounded-[var(--radius-md)] overflow-hidden bg-surface-2">
+          {/* Photo row: spans both columns, straddling the gutter beneath it. */}
+          <div className="md:col-span-2 relative aspect-[16/9] md:aspect-[3/1] rounded-[var(--radius-lg)] overflow-hidden bg-surface-2 shadow-elevated">
             {heroImage ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover grayscale" />
+              <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover photo-mono" />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-border/40 to-surface-2" />
             )}
@@ -88,37 +85,33 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Text zone: left = eyebrow + short statement, right = big two-tone headline —
-              same bottom-anchored split as the reference. */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="flex items-end px-6 md:px-10 py-10 md:py-14 md:border-r border-border">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted mb-3">Академия KOLOS</p>
-                <p className="text-lg md:text-xl font-bold leading-snug max-w-sm">{heroTitle}</p>
-              </div>
-            </div>
-            <div className="px-6 md:px-10 py-10 md:py-14">
-              <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight leading-[0.95] mb-5">
-                KOLOS <span className="text-muted">Барбершоп</span>
-              </h1>
-              <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
+          {/* Bottom row: short statement + CTA (left) / oversized two-tone headline (right). */}
+          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-4 pb-9 md:pb-11 flex flex-col justify-end">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted mb-3">Академия KOLOS</p>
+            <p className="text-lg md:text-xl font-bold leading-snug max-w-sm mb-8">{heroTitle}</p>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/courses"
+                className="group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse transition-[transform,filter] hover:-translate-y-0.5 hover:brightness-125"
+              >
+                <span className="font-medium">Смотреть курсы</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+              <Link
+                href="/auth/login?mode=register"
+                className="text-sm font-medium underline underline-offset-4 hover:text-muted"
+              >
+                Регистрация
+              </Link>
             </div>
           </div>
-
-          {/* Bottom CTA bar. */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 md:px-10 py-6 border-t border-border">
-            <Link
-              href="/courses"
-              className="group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse"
-            >
-              <span className="font-medium">Смотреть курсы</span>
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            </Link>
-            <Link href="/auth/login?mode=register" className="text-sm font-medium underline underline-offset-4">
-              Регистрация
-            </Link>
+          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-4 pb-9 md:pb-11 flex flex-col justify-end">
+            <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] mb-6">
+              KOLOS <span className="text-muted">Академия</span>
+            </h1>
+            <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
           </div>
         </div>
       </section>
@@ -127,10 +120,10 @@ export default async function HomePage() {
         <PromoBanner text={settings?.promo_banner_text || undefined} />
       )}
 
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-20 md:py-28">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <h2 className="text-3xl font-bold uppercase tracking-tight mb-2">Популярные курсы</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-2">Популярные курсы</h2>
             <p className="text-muted">Выберите направление и начните путь мастера</p>
           </div>
           <Link href="/courses" className="hidden sm:inline-flex items-center gap-2 text-sm text-muted hover:text-text">
@@ -153,9 +146,9 @@ export default async function HomePage() {
       </section>
 
       {reviews.length > 0 && (
-        <section className="container mx-auto px-4 py-20 border-t border-border">
+        <section className="container mx-auto px-4 py-20 md:py-28 border-t border-border">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold uppercase tracking-tight mb-3">Отзывы барберов</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-3">Отзывы барберов</h2>
             <p className="text-muted">Те, кто уже прошёл KOLOS</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -177,10 +170,30 @@ export default async function HomePage() {
         </section>
       )}
 
+      <section className="bg-charcoal text-on-inverse">
+        <div className="container mx-auto px-4 py-20 md:py-28 text-center">
+          <h2 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tight leading-[1.05] mb-5">
+            Готовы стать <span className="text-on-inverse/50">мастером?</span>
+          </h2>
+          <p className="text-on-inverse/60 max-w-xl mx-auto mb-10 leading-relaxed">
+            Начните с любого курса — видеоуроки, практика и именной сертификат по итогам обучения.
+          </p>
+          <Link
+            href="/auth/login?mode=register"
+            className="group inline-flex items-center gap-4 rounded-full bg-on-inverse py-2 pl-6 pr-2 text-inverse shadow-inverse hover:brightness-95 transition-[filter,transform] hover:-translate-y-0.5"
+          >
+            <span className="font-medium">Начать бесплатно</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-inverse text-on-inverse transition-transform group-hover:translate-x-0.5">
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </Link>
+        </div>
+      </section>
+
       {faqs.length > 0 && (
-        <section className="container mx-auto px-4 py-20">
+        <section className="container mx-auto px-4 py-20 md:py-28">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold uppercase tracking-tight mb-3">Частые вопросы</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tight mb-3">Частые вопросы</h2>
             <p className="text-muted">Всё, что нужно знать перед стартом</p>
           </div>
           <div className="max-w-2xl mx-auto space-y-3">

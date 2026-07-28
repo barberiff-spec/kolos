@@ -4,17 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse/30 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-[transform,box-shadow,filter] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse/30 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        // Primary: black pill, white text; hover +6% brightness, active -10%
+        // Primary: black pill, white text — deep cast shadow gives it real
+        // presence against the light bg; lifts 2px + brightens on hover.
         default:
-          "bg-inverse text-on-inverse shadow-card hover:brightness-125 active:brightness-90",
+          "bg-inverse text-on-inverse shadow-inverse hover:-translate-y-0.5 hover:brightness-125 active:translate-y-0 active:brightness-90",
         // Secondary: transparent, 1px --border, --text
         secondary: "border border-border bg-transparent text-text hover:bg-text/5 hover:border-text/30",
         ghost: "text-muted hover:text-text hover:bg-text/5",
-        destructive: "bg-danger-strong text-on-inverse hover:brightness-110 active:brightness-90",
+        destructive: "bg-danger-strong text-on-inverse shadow-inverse hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-90",
       },
       size: {
         default: "h-11 px-6 py-2",
