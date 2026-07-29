@@ -11,30 +11,52 @@ const DEFAULT_HERO_SUBTITLE =
   "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
   "и работа с инструментами — обучение от мастеров элитных студий барберинга.";
 
-// Leader-line callouts: a short line + dot pointing from a label in the
-// margin into the photo — the reference's annotated-product-shot motif,
-// not a pill badge sitting on top of the image.
+// Hero photo geometry, all derived from the source file's real aspect ratio
+// (1102x1494, tightly cropped to the subject) so the reserved space below it
+// always matches what the image actually occupies — no hand-tuned
+// min-heights that drift when the photo or the copy changes.
+const HERO_PHOTO_W = 29;
+const HERO_PHOTO_H = +(HERO_PHOTO_W * (1494 / 1102)).toFixed(2);
+const HERO_PHOTO_TOP = 4.5; // clears the eyebrow badge above it
+const HERO_PHOTO_HALF = HERO_PHOTO_W / 2;
+const HERO_PHOTO_BOTTOM = HERO_PHOTO_TOP + HERO_PHOTO_H;
+const HERO_BADGE_BAND = 4.375; // pt-9 + the badge pill's own height
+
+// Leader-line callouts, styled like the reference's: a hairline + end dot,
+// label set in two tones (bold lead word, muted tail). Tops are absolute rem
+// values inside the photo's vertical band, so they stay pinned to the subject
+// instead of sliding around as percentages of a changing container height.
 const HERO_CALLOUTS = [
-  { label: "Стрижки и фейды", top: "18%", side: "left" as const },
-  { label: "Бритьё и уход за бородой", top: "48%", side: "right" as const },
-  { label: "Сертификат по итогам курса", top: "80%", side: "left" as const },
+  { lead: "Фейд", tail: "и переходы", top: 15, side: "left" as const },
+  { lead: "Контур", tail: "и окантовка", top: 33, side: "left" as const },
+  { lead: "Борода", tail: "и стайлинг", top: 22, side: "right" as const },
+  { lead: "Финиш", tail: "и укладка", top: 40, side: "right" as const },
 ];
 
-function HeroCallout({ label, top, side }: { label: string; top: string; side: "left" | "right" }) {
-  // `left-0`/`right-0` on an absolutely positioned element sit at the
-  // containing block's PADDING-box edge, i.e. before the parent's own
-  // padding is applied — not at the visual edge the padding creates. So
-  // the offset has to match the photo row's padding value exactly (36 =
-  // px-36) for the dot to land right on the photo's edge instead of out
-  // past the card's own border.
+function HeroCallout({
+  lead,
+  tail,
+  top,
+  side,
+}: {
+  lead: string;
+  tail: string;
+  top: number;
+  side: "left" | "right";
+}) {
+  const isLeft = side === "left";
+  const inset = `calc(50% + ${HERO_PHOTO_HALF}rem + 1rem)`;
   return (
     <div
-      className={`absolute flex items-center gap-2 ${side === "left" ? "left-36 -translate-x-full pr-2" : "right-36 translate-x-full pl-2 flex-row-reverse"}`}
-      style={{ top }}
+      className={`hidden md:flex absolute z-30 items-center gap-3 ${isLeft ? "flex-row" : "flex-row-reverse"}`}
+      style={isLeft ? { top: `${top}rem`, right: inset } : { top: `${top}rem`, left: inset }}
     >
-      <span className="text-xs text-muted whitespace-nowrap">{label}</span>
-      <span className={`h-px w-6 bg-border ${side === "right" ? "scale-x-[-1]" : ""}`} />
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full border border-border" />
+      <span className="text-[11px] leading-none whitespace-nowrap">
+        <span className="font-bold text-text">{lead}</span>{" "}
+        <span className="text-muted">{tail}</span>
+      </span>
+      <span className="h-px w-10 bg-border" />
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full border border-border bg-surface" />
     </div>
   );
 }
@@ -63,57 +85,43 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Split hero: one continuous card cut by a thin vertical line — not a bold
-          gutter — with the photo floating dominant across the seam and thin
-          leader-line callouts pointing into it from the margins. Matches the
-          reference's actual structure: single card, hairline divider, product
-          shot breaking out of the grid, mini shots sitting by the CTA. */}
-      <section className="container mx-auto px-4 pt-6 md:pt-8">
-        <div className="relative rounded-[var(--radius-lg)] border border-border bg-surface shadow-elevated">
-          {/* Hairline divider — desktop only, spans the full card height. */}
-          <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-border z-10" />
-
-          {/* Top bar: just the eyebrow badge — KOLOS's own site nav already
-              lives in the sticky Navbar above, so this isn't a second header. */}
-          <div className="relative px-6 md:px-10 pt-6 md:pt-8">
+      {/* Split hero, matching the reference exactly: two rounded panels on a
+          black field, with the seam running between them — and the photo
+          floating on top, centred over that seam so the line is interrupted
+          by the subject rather than cutting across it. Panels carry the
+          content; the photo, leader lines and mini shots are overlays whose
+          vertical bands are reserved by the panels' min-height + padding,
+          so nothing can collide. */}
+      <section className="bg-inverse p-3 md:p-4">
+        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          {/* LEFT PANEL */}
+          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-9 md:pb-12 flex flex-col">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
               <Sparkles className="h-3.5 w-3.5" />
               {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
             </div>
-          </div>
 
-          {/* The dominant product shot: margin either side leaves room for the
-              leader-line callouts, and a light object-contain frame (instead of
-              a cropping object-cover) shows the whole photo the way the
-              reference shows the whole drone rather than cropping into it. */}
-          <div className="relative px-8 md:px-36 pt-8 md:pt-10 pb-4">
-            <div className="relative mx-auto aspect-[4/3] md:aspect-[16/9] max-w-2xl rounded-[var(--radius-md)] bg-surface-2 shadow-card">
-              {heroImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={heroImage}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-contain photo-mono p-2"
-                />
-              ) : (
-                <div className="absolute inset-0 rounded-[var(--radius-md)] bg-gradient-to-br from-border/40 to-surface-2" />
-              )}
+            {/* Mobile keeps the photo inline — there is no seam to straddle.
+                Its backdrop was cut out to pure white in the source file, so
+                it uses photo-mono-bright (no brightness dip) to actually stay
+                white against the panel instead of reading as a gray box. */}
+            <div className="md:hidden relative mt-7">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={heroImage} alt="" className="w-full h-auto photo-mono-bright" />
             </div>
-            <div className="hidden md:block">
-              {HERO_CALLOUTS.map((c) => (
-                <HeroCallout key={c.label} {...c} />
-              ))}
-            </div>
-          </div>
 
-          {/* Bottom: short statement + CTA + mini shots (left) / oversized
-              two-tone headline (right) — same two-column split as the
-              reference's text zone. */}
-          <div className="relative grid grid-cols-1 md:grid-cols-2">
-            <div className="px-6 md:px-10 pt-6 pb-8 md:pb-11 md:pr-10">
+            {/* Reserves exactly the band the overlaid photo occupies, so the
+                copy below can never end up underneath it. */}
+            <div
+              aria-hidden
+              className="hidden md:block"
+              style={{ height: `${HERO_PHOTO_BOTTOM - HERO_BADGE_BAND}rem` }}
+            />
+
+            <div className="mt-auto pt-10 md:pt-8">
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted mb-3">Академия KOLOS</p>
-              <p className="text-lg md:text-xl font-bold leading-snug max-w-sm mb-8">{heroTitle}</p>
-              <div className="flex items-center gap-6">
+              <p className="text-lg md:text-xl font-bold leading-snug max-w-xs mb-8">{heroTitle}</p>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link
                   href="/courses"
                   className="glow-on-hover group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse hover:shadow-inverse-hover hover:-translate-y-0.5"
@@ -129,9 +137,15 @@ export default async function HomePage() {
                 >
                   Регистрация
                 </Link>
-                <div className="hidden sm:flex items-center gap-2 ml-auto">
+                {/* Mini shots live here rather than floating over the seam:
+                    as an overlay they collided with both the photo above and
+                    the headline opposite at some viewport heights. */}
+                <div className="hidden sm:flex items-center gap-2 sm:ml-auto">
                   {courses.slice(0, 2).map((c) => (
-                    <div key={c.id} className="h-11 w-11 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0">
+                    <div
+                      key={c.id}
+                      className="h-12 w-12 rounded-2xl overflow-hidden bg-surface border border-border shadow-card"
+                    >
                       {c.image_url && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={c.image_url} alt="" className="h-full w-full object-cover photo-mono" />
@@ -141,13 +155,40 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="px-6 md:px-10 pt-6 pb-8 md:pb-11 md:pl-10 md:border-l border-border/0">
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-9 md:pb-12 flex flex-col">
+            <div
+              aria-hidden
+              className="hidden md:block"
+              style={{ height: `${HERO_PHOTO_BOTTOM - 2.25}rem` }}
+            />
+            <div className="mt-auto pt-10 md:pt-8">
               <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] mb-6">
                 KOLOS <span className="text-muted">Академия</span>
               </h1>
               <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
             </div>
           </div>
+
+          {/* The subject, centred over the seam — no card chrome around it
+              (no border/shadow/rounded box): the photo's own backdrop was
+              cut out to pure white in the source file, so it merges straight
+              into the panels instead of reading as a sticker on top of them.
+              Being opaque white, it also masks the black seam behind it, so
+              the divider stops at the subject instead of cutting through. */}
+          <div
+            className="hidden md:block absolute z-20 left-1/2 -translate-x-1/2"
+            style={{ top: `${HERO_PHOTO_TOP}rem`, width: `${HERO_PHOTO_W}rem` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroImage} alt="" className="w-full h-auto photo-mono-bright" />
+          </div>
+
+          {HERO_CALLOUTS.map((c) => (
+            <HeroCallout key={c.lead} {...c} />
+          ))}
         </div>
       </section>
 

@@ -160,6 +160,14 @@
     filter: grayscale(1) contrast(1.15) brightness(0.95);
   }
 
+  /* Same idea but without the brightness dip — for photos that are cut out
+     onto a pure-white backdrop (the hero portrait). brightness(0.95) would
+     push that white to ~#F2F2F2, which then reads as a faint gray box
+     against the --surface card behind it instead of merging into it. */
+  .photo-mono-bright {
+    filter: grayscale(1) contrast(1.15);
+  }
+
   .noise-texture {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
