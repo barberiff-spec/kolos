@@ -16,7 +16,7 @@ export function PromoBanner({ text }: { text?: string }) {
         </div>
         <Link
           href="/courses"
-          className="group inline-flex items-center gap-3 rounded-full bg-on-inverse py-2 pl-5 pr-2 text-inverse shadow-inverse hover:brightness-95 transition-[filter,transform] hover:-translate-y-0.5"
+          className="chrome-shine-dark group inline-flex items-center gap-3 rounded-full bg-on-inverse py-2 pl-5 pr-2 text-inverse shadow-inverse hover:brightness-95 transition-[filter,transform] hover:-translate-y-0.5"
         >
           <span className="text-sm font-medium">Выбрать курс</span>
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-inverse text-on-inverse">

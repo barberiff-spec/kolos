@@ -9,9 +9,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Primary: black pill, white text — deep cast shadow gives it real
-        // presence against the light bg; lifts 2px + brightens on hover.
+        // presence against the light bg; a slow chrome shimmer drifts across
+        // it at rest, and the shadow blooms into a soft halo on hover.
         default:
-          "bg-inverse text-on-inverse shadow-inverse hover:-translate-y-0.5 hover:brightness-125 active:translate-y-0 active:brightness-90",
+          "chrome-shine bg-inverse text-on-inverse shadow-inverse hover:shadow-[var(--shadow-inverse-hover)] hover:-translate-y-0.5 hover:brightness-125 active:translate-y-0 active:brightness-90",
         // Secondary: transparent, 1px --border, --text
         secondary: "border border-border bg-transparent text-text hover:bg-text/5 hover:border-text/30",
         ghost: "text-muted hover:text-text hover:bg-text/5",

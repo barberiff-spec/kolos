@@ -10,7 +10,7 @@ export function Footer({ settings }: { settings: SiteSettings | null }) {
     settings?.social_instagram || settings?.social_telegram || settings?.social_whatsapp || settings?.social_vk;
 
   return (
-    <footer className="bg-charcoal text-on-inverse mt-20 pb-16 md:pb-0">
+    <footer className="bg-charcoal text-on-inverse mt-20 pb-[var(--bottom-nav-h)]">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>

@@ -87,7 +87,7 @@ export default function LearnContent() {
 
   if (loading || authLoading) {
     return (
-      <div className="flex h-[calc(100dvh-4rem)] items-center justify-center">
+      <div className="flex h-[calc(100dvh-var(--nav-h)-var(--bottom-nav-h))] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
       </div>
     );
@@ -104,7 +104,7 @@ export default function LearnContent() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden">
+    <div className="flex h-[calc(100dvh-var(--nav-h)-var(--bottom-nav-h))] overflow-hidden">
       <aside
         className={cn(
           "ios-scroll border-r border-text/5 bg-bg/95 md:bg-bg/40 md:backdrop-blur-xl transition-all duration-300 overflow-y-auto",

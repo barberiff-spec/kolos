@@ -18,7 +18,7 @@ export default async function MobileHomePage() {
         <div className="flex flex-col gap-3 max-w-xs mx-auto">
           <Link
             href="/courses"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-inverse text-on-inverse font-medium"
+            className="chrome-shine inline-flex h-12 items-center justify-center rounded-full bg-inverse text-on-inverse font-medium"
           >
             Смотреть курсы
           </Link>

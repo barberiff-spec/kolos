@@ -74,7 +74,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PremiumBackground />
         <AuthProvider>
           <Navbar />
-          <main className="relative min-h-[calc(100dvh-4rem)]">{children}</main>
+          <main className="relative min-h-[calc(100dvh-var(--nav-h)-var(--bottom-nav-h))]">{children}</main>
           <Footer settings={settings} />
           <BottomNav />
         </AuthProvider>
