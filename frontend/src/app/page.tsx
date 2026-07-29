@@ -11,11 +11,33 @@ const DEFAULT_HERO_SUBTITLE =
   "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
   "и работа с инструментами — обучение от мастеров элитных студий барберинга.";
 
+// Leader-line callouts: a short line + dot pointing from a label in the
+// margin into the photo — the reference's annotated-product-shot motif,
+// not a pill badge sitting on top of the image.
 const HERO_CALLOUTS = [
-  { label: "Стрижки и фейды", style: "top-[8%] left-[6%] md:left-[10%]" },
-  { label: "Бритьё и уход за бородой", style: "top-[42%] right-[6%] md:right-[10%]" },
-  { label: "Сертификат по итогам курса", style: "bottom-[10%] left-[8%] md:left-[14%]" },
+  { label: "Стрижки и фейды", top: "18%", side: "left" as const },
+  { label: "Бритьё и уход за бородой", top: "48%", side: "right" as const },
+  { label: "Сертификат по итогам курса", top: "80%", side: "left" as const },
 ];
+
+function HeroCallout({ label, top, side }: { label: string; top: string; side: "left" | "right" }) {
+  // `left-0`/`right-0` on an absolutely positioned element sit at the
+  // containing block's PADDING-box edge, i.e. before the parent's own
+  // padding is applied — not at the visual edge the padding creates. So
+  // the offset has to match the photo row's padding value exactly (36 =
+  // px-36) for the dot to land right on the photo's edge instead of out
+  // past the card's own border.
+  return (
+    <div
+      className={`absolute flex items-center gap-2 ${side === "left" ? "left-36 -translate-x-full pr-2" : "right-36 translate-x-full pl-2 flex-row-reverse"}`}
+      style={{ top }}
+    >
+      <span className="text-xs text-muted whitespace-nowrap">{label}</span>
+      <span className={`h-px w-6 bg-border ${side === "right" ? "scale-x-[-1]" : ""}`} />
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full border border-border" />
+    </div>
+  );
+}
 
 async function getData() {
   const [courses, reviews, faqs, settings] = await Promise.all([
@@ -37,81 +59,94 @@ export default async function HomePage() {
   const minPrice = courses.length > 0 ? Math.min(...courses.map((c) => c.price)) : null;
   const heroTitle = settings?.hero_title || DEFAULT_HERO_TITLE;
   const heroSubtitle = settings?.hero_subtitle || DEFAULT_HERO_SUBTITLE;
-  const heroImage = courses[0]?.image_url;
+  const heroImage = "/hero/portrait.jpg";
 
   return (
     <div>
-      {/* Split hero: a black backdrop cut into rounded white cells by a real gutter,
-          the photo laid in its own full-width row so it visually crosses the seam —
-          the signature move of the reference. Plain grid rows, no absolute-position
-          overlays, so nothing can ever overlap regardless of content or viewport. */}
-      <section className="bg-inverse px-3 py-3 md:px-4 md:py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          {/* Top row: eyebrow badge (left) / mini course thumbnails (right). */}
-          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-4 flex items-center">
+      {/* Split hero: one continuous card cut by a thin vertical line — not a bold
+          gutter — with the photo floating dominant across the seam and thin
+          leader-line callouts pointing into it from the margins. Matches the
+          reference's actual structure: single card, hairline divider, product
+          shot breaking out of the grid, mini shots sitting by the CTA. */}
+      <section className="container mx-auto px-4 pt-6 md:pt-8">
+        <div className="relative rounded-[var(--radius-lg)] border border-border bg-surface shadow-elevated">
+          {/* Hairline divider — desktop only, spans the full card height. */}
+          <div className="hidden md:block absolute inset-y-0 left-1/2 w-px bg-border z-10" />
+
+          {/* Top bar: just the eyebrow badge — KOLOS's own site nav already
+              lives in the sticky Navbar above, so this isn't a second header. */}
+          <div className="relative px-6 md:px-10 pt-6 md:pt-8">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
               <Sparkles className="h-3.5 w-3.5" />
               {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
             </div>
           </div>
-          <div className="hidden md:flex bg-surface rounded-[var(--radius-lg)] px-10 pt-9 pb-4 items-center justify-end gap-3">
-            {courses.slice(0, 2).map((c) => (
-              <div key={c.id} className="h-12 w-12 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0">
-                {c.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.image_url} alt="" className="h-full w-full object-cover photo-mono" />
-                )}
-              </div>
-            ))}
-          </div>
 
-          {/* Photo row: spans both columns, straddling the gutter beneath it. */}
-          <div className="md:col-span-2 relative aspect-[16/9] md:aspect-[3/1] rounded-[var(--radius-lg)] overflow-hidden bg-surface-2 shadow-elevated">
-            {heroImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroImage} alt="" className="absolute inset-0 h-full w-full object-cover photo-mono" />
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-border/40 to-surface-2" />
-            )}
+          {/* The dominant product shot: margin either side leaves room for the
+              leader-line callouts, and a light object-contain frame (instead of
+              a cropping object-cover) shows the whole photo the way the
+              reference shows the whole drone rather than cropping into it. */}
+          <div className="relative px-8 md:px-36 pt-8 md:pt-10 pb-4">
+            <div className="relative mx-auto aspect-[4/3] md:aspect-[16/9] max-w-2xl rounded-[var(--radius-md)] bg-surface-2 shadow-card">
+              {heroImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={heroImage}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-contain photo-mono p-2"
+                />
+              ) : (
+                <div className="absolute inset-0 rounded-[var(--radius-md)] bg-gradient-to-br from-border/40 to-surface-2" />
+              )}
+            </div>
             <div className="hidden md:block">
               {HERO_CALLOUTS.map((c) => (
-                <span
-                  key={c.label}
-                  className={`absolute ${c.style} rounded-full bg-surface/90 border border-border px-3 py-1 text-xs text-text backdrop-blur-sm`}
-                >
-                  {c.label}
-                </span>
+                <HeroCallout key={c.label} {...c} />
               ))}
             </div>
           </div>
 
-          {/* Bottom row: short statement + CTA (left) / oversized two-tone headline (right). */}
-          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-4 pb-9 md:pb-11 flex flex-col justify-end">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted mb-3">Академия KOLOS</p>
-            <p className="text-lg md:text-xl font-bold leading-snug max-w-sm mb-8">{heroTitle}</p>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/courses"
-                className="glow-on-hover group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse hover:shadow-inverse-hover hover:-translate-y-0.5"
-              >
-                <span className="font-medium">Смотреть курсы</span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </Link>
-              <Link
-                href="/auth/login?mode=register"
-                className="text-sm font-medium underline underline-offset-4 hover:text-muted"
-              >
-                Регистрация
-              </Link>
+          {/* Bottom: short statement + CTA + mini shots (left) / oversized
+              two-tone headline (right) — same two-column split as the
+              reference's text zone. */}
+          <div className="relative grid grid-cols-1 md:grid-cols-2">
+            <div className="px-6 md:px-10 pt-6 pb-8 md:pb-11 md:pr-10">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted mb-3">Академия KOLOS</p>
+              <p className="text-lg md:text-xl font-bold leading-snug max-w-sm mb-8">{heroTitle}</p>
+              <div className="flex items-center gap-6">
+                <Link
+                  href="/courses"
+                  className="glow-on-hover group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse hover:shadow-inverse-hover hover:-translate-y-0.5"
+                >
+                  <span className="font-medium">Смотреть курсы</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </Link>
+                <Link
+                  href="/auth/login?mode=register"
+                  className="text-sm font-medium underline underline-offset-4 hover:text-muted"
+                >
+                  Регистрация
+                </Link>
+                <div className="hidden sm:flex items-center gap-2 ml-auto">
+                  {courses.slice(0, 2).map((c) => (
+                    <div key={c.id} className="h-11 w-11 rounded-2xl overflow-hidden bg-surface-2 border border-border shrink-0">
+                      {c.image_url && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.image_url} alt="" className="h-full w-full object-cover photo-mono" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-4 pb-9 md:pb-11 flex flex-col justify-end">
-            <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] mb-6">
-              KOLOS <span className="text-muted">Академия</span>
-            </h1>
-            <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
+            <div className="px-6 md:px-10 pt-6 pb-8 md:pb-11 md:pl-10 md:border-l border-border/0">
+              <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] mb-6">
+                KOLOS <span className="text-muted">Академия</span>
+              </h1>
+              <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
+            </div>
           </div>
         </div>
       </section>
