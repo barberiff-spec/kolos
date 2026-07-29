@@ -42,12 +42,19 @@
       0 16px 32px -8px rgba(20, 20, 20, 0.14),
       0 40px 80px -16px rgba(20, 20, 20, 0.18);
     --shadow-inverse: 0 16px 40px -12px rgba(20, 20, 20, 0.35);
-    /* Hover state of a primary pill: the cast shadow deepens AND spreads
-       into a soft ambient halo, like the pill lifting closer to the light. */
+    /* Hover halo for a BLACK pill on the light bg: the button surface itself
+       never changes (no brightness/filter shift) — only a soft ring blooms
+       outward around it, on top of the resting cast shadow. */
     --shadow-inverse-hover:
-      0 4px 10px rgba(20, 20, 20, 0.18),
-      0 0 32px 4px rgba(20, 20, 20, 0.22),
-      0 24px 56px -10px rgba(20, 20, 20, 0.45);
+      0 16px 40px -12px rgba(20, 20, 20, 0.35),
+      0 0 0 10px rgba(20, 20, 20, 0.09),
+      0 0 56px 14px rgba(20, 20, 20, 0.42);
+    /* Same idea for a WHITE pill sitting on a charcoal section — the halo
+       reads as actual light glow there instead of a dark bloom. */
+    --shadow-glow-hover:
+      0 16px 40px -12px rgba(20, 20, 20, 0.35),
+      0 0 0 10px rgba(255, 255, 255, 0.14),
+      0 0 56px 14px rgba(255, 255, 255, 0.5);
   }
 
   /* Desktop hides the bottom bar entirely, so it reserves no space. */
@@ -93,88 +100,12 @@
     }
   }
 
-  /* Chrome shine: a soft specular band drifts across the primary pill on a
-     loop, like light catching brushed metal — pauses between passes so it
-     reads as ambient, not busy. Speeds up on hover/press, same idea as the
-     liquid-metal reference (idle shimmer that quickens when you engage it),
-     done as a CSS sweep instead of a WebGL shader. */
-  @keyframes chrome-sweep {
-    0%,
-    15% {
-      transform: translateX(-120%);
-    }
-    55%,
-    100% {
-      transform: translateX(120%);
-    }
-  }
-  .chrome-shine {
-    position: relative;
-    overflow: hidden;
-  }
-  .chrome-shine::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      115deg,
-      transparent 30%,
-      rgb(var(--on-inverse) / 0.4) 47%,
-      rgb(var(--on-inverse) / 0.6) 50%,
-      rgb(var(--on-inverse) / 0.4) 53%,
-      transparent 70%
-    );
-    transform: translateX(-120%);
-    animation: chrome-sweep 3.4s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .chrome-shine:hover::after {
-    animation-duration: 1.1s;
-  }
-  .chrome-shine:active::after {
-    animation-duration: 0.45s;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .chrome-shine::after {
-      animation: none;
-      content: none;
-    }
-  }
-
-  /* Same sweep, inverted: for white pills sitting on the charcoal sections
-     (promo banner, dark CTA band), where the shine needs to be dark instead
-     of light to read against a light fill. */
-  .chrome-shine-dark {
-    position: relative;
-    overflow: hidden;
-  }
-  .chrome-shine-dark::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      115deg,
-      transparent 30%,
-      rgb(var(--inverse) / 0.12) 47%,
-      rgb(var(--inverse) / 0.22) 50%,
-      rgb(var(--inverse) / 0.12) 53%,
-      transparent 70%
-    );
-    transform: translateX(-120%);
-    animation: chrome-sweep 3.4s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .chrome-shine-dark:hover::after {
-    animation-duration: 1.1s;
-  }
-  .chrome-shine-dark:active::after {
-    animation-duration: 0.45s;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .chrome-shine-dark::after {
-      animation: none;
-      content: none;
-    }
+  /* Hover glow: a soft ring blooms around a pill on :hover only — nothing
+     animates at rest, and the pill's own fill/text never changes brightness.
+     Just a transition on box-shadow (defined per-button via --shadow-*-hover
+     above), so the glow fades in/out smoothly instead of popping. */
+  .glow-on-hover {
+    transition: box-shadow 0.35s ease-out, transform 0.2s ease-out;
   }
 }
 

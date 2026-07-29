@@ -92,7 +92,7 @@ export default async function HomePage() {
             <div className="flex items-center gap-6">
               <Link
                 href="/courses"
-                className="chrome-shine group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse transition-[transform,filter] hover:-translate-y-0.5 hover:brightness-125"
+                className="glow-on-hover group inline-flex items-center gap-4 rounded-full bg-inverse py-2 pl-6 pr-2 text-on-inverse shadow-inverse hover:shadow-inverse-hover hover:-translate-y-0.5"
               >
                 <span className="font-medium">Смотреть курсы</span>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-on-inverse text-inverse transition-transform group-hover:translate-x-0.5">
@@ -180,7 +180,7 @@ export default async function HomePage() {
           </p>
           <Link
             href="/auth/login?mode=register"
-            className="chrome-shine-dark group inline-flex items-center gap-4 rounded-full bg-on-inverse py-2 pl-6 pr-2 text-inverse shadow-inverse hover:brightness-95 transition-[filter,transform] hover:-translate-y-0.5"
+            className="glow-on-hover group inline-flex items-center gap-4 rounded-full bg-on-inverse py-2 pl-6 pr-2 text-inverse shadow-inverse hover:shadow-glow-hover hover:-translate-y-0.5"
           >
             <span className="font-medium">Начать бесплатно</span>
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-inverse text-on-inverse transition-transform group-hover:translate-x-0.5">

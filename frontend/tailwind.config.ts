@@ -27,6 +27,11 @@ const config: Config = {
         card: "var(--shadow-card)",
         elevated: "var(--shadow-elevated)",
         inverse: "var(--shadow-inverse)",
+        // Named theme values (not arbitrary shadow-[...] syntax) — Tailwind's
+        // arbitrary-value heuristic misreads a bare var() as a *color*, not
+        // a full box-shadow, so hover:shadow-[var(--x)] silently does nothing.
+        "inverse-hover": "var(--shadow-inverse-hover)",
+        "glow-hover": "var(--shadow-glow-hover)",
       },
       borderRadius: {
         lg: "var(--radius-lg)",
