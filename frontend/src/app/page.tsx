@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Star } from "lucide-react";
 import { CourseCard } from "@/components/courses/course-card";
 import { PromoBanner } from "@/components/landing/promo-banner";
 import { serverFetch } from "@/lib/server-api";
@@ -11,55 +11,15 @@ const DEFAULT_HERO_SUBTITLE =
   "Мужские стрижки и фейды, бритьё с горячими полотенцами, уход за бородой " +
   "и работа с инструментами — обучение от мастеров элитных студий барберинга.";
 
-// Hero photo geometry, all derived from the source file's real aspect ratio
-// (1102x1494, tightly cropped to the subject) so the reserved space below it
-// always matches what the image actually occupies — no hand-tuned
-// min-heights that drift when the photo or the copy changes.
-const HERO_PHOTO_W = 29;
-const HERO_PHOTO_H = +(HERO_PHOTO_W * (1494 / 1102)).toFixed(2);
-const HERO_PHOTO_TOP = 4.5; // clears the eyebrow badge above it
-const HERO_PHOTO_HALF = HERO_PHOTO_W / 2;
-const HERO_PHOTO_BOTTOM = HERO_PHOTO_TOP + HERO_PHOTO_H;
-const HERO_BADGE_BAND = 4.375; // pt-9 + the badge pill's own height
-
-// Leader-line callouts, styled like the reference's: a hairline + end dot,
-// label set in two tones (bold lead word, muted tail). Tops are absolute rem
-// values inside the photo's vertical band, so they stay pinned to the subject
-// instead of sliding around as percentages of a changing container height.
-const HERO_CALLOUTS = [
-  { lead: "Фейд", tail: "и переходы", top: 15, side: "left" as const },
-  { lead: "Контур", tail: "и окантовка", top: 33, side: "left" as const },
-  { lead: "Борода", tail: "и стайлинг", top: 22, side: "right" as const },
-  { lead: "Финиш", tail: "и укладка", top: 40, side: "right" as const },
+// Skill labels, set over the photo's lower edge rather than as leader lines
+// pointing at the subject from outside — the photo now fills its whole panel,
+// so there is no margin left to run a line through.
+const HERO_SKILLS = [
+  { lead: "Фейд", tail: "и переходы" },
+  { lead: "Контур", tail: "и окантовка" },
+  { lead: "Борода", tail: "и стайлинг" },
+  { lead: "Финиш", tail: "и укладка" },
 ];
-
-function HeroCallout({
-  lead,
-  tail,
-  top,
-  side,
-}: {
-  lead: string;
-  tail: string;
-  top: number;
-  side: "left" | "right";
-}) {
-  const isLeft = side === "left";
-  const inset = `calc(50% + ${HERO_PHOTO_HALF}rem + 1rem)`;
-  return (
-    <div
-      className={`hidden md:flex absolute z-30 items-center gap-3 ${isLeft ? "flex-row" : "flex-row-reverse"}`}
-      style={isLeft ? { top: `${top}rem`, right: inset } : { top: `${top}rem`, left: inset }}
-    >
-      <span className="text-[11px] leading-none whitespace-nowrap">
-        <span className="font-bold text-text">{lead}</span>{" "}
-        <span className="text-muted">{tail}</span>
-      </span>
-      <span className="h-px w-10 bg-border" />
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full border border-border bg-surface" />
-    </div>
-  );
-}
 
 async function getData() {
   const [courses, reviews, faqs, settings] = await Promise.all([
@@ -85,38 +45,17 @@ export default async function HomePage() {
 
   return (
     <div>
-      {/* Split hero, matching the reference exactly: two rounded panels on a
-          black field, with the seam running between them — and the photo
-          floating on top, centred over that seam so the line is interrupted
-          by the subject rather than cutting across it. Panels carry the
-          content; the photo, leader lines and mini shots are overlays whose
-          vertical bands are reserved by the panels' min-height + padding,
-          so nothing can collide. */}
+      {/* Split hero: two rounded panels on a black field. Left carries the
+          CTA copy; right is the portrait filling its panel edge-to-edge,
+          with the heading and skill tags set directly over the photo. */}
       <section className="bg-inverse p-3 md:p-4">
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* LEFT PANEL */}
           <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-9 md:pb-12 flex flex-col">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted">
               <Sparkles className="h-3.5 w-3.5" />
               {minPrice ? `Курсы от ${formatPrice(minPrice)}` : "Премиальное обучение барберов"}
             </div>
-
-            {/* Mobile keeps the photo inline — there is no seam to straddle.
-                Its backdrop was cut out to pure white in the source file, so
-                it uses photo-mono-bright (no brightness dip) to actually stay
-                white against the panel instead of reading as a gray box. */}
-            <div className="md:hidden relative mt-7">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={heroImage} alt="" className="w-full h-auto photo-mono-bright" />
-            </div>
-
-            {/* Reserves exactly the band the overlaid photo occupies, so the
-                copy below can never end up underneath it. */}
-            <div
-              aria-hidden
-              className="hidden md:block"
-              style={{ height: `${HERO_PHOTO_BOTTOM - HERO_BADGE_BAND}rem` }}
-            />
 
             <div className="mt-auto pt-10 md:pt-8">
               <p className="text-[11px] uppercase tracking-[0.18em] text-muted mb-3">Академия KOLOS</p>
@@ -137,9 +76,6 @@ export default async function HomePage() {
                 >
                   Регистрация
                 </Link>
-                {/* Mini shots live here rather than floating over the seam:
-                    as an overlay they collided with both the photo above and
-                    the headline opposite at some viewport heights. */}
                 <div className="hidden sm:flex items-center gap-2 sm:ml-auto">
                   {courses.slice(0, 2).map((c) => (
                     <div
@@ -157,38 +93,34 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* RIGHT PANEL */}
-          <div className="bg-surface rounded-[var(--radius-lg)] px-7 md:px-10 pt-7 md:pt-9 pb-9 md:pb-12 flex flex-col">
-            <div
-              aria-hidden
-              className="hidden md:block"
-              style={{ height: `${HERO_PHOTO_BOTTOM - 2.25}rem` }}
+          {/* RIGHT PANEL — the photo fills the whole panel edge-to-edge,
+              cropped with the panel's own corner radius, instead of floating
+              as a cutout on top of it. Title/subtitle sit directly on the
+              photo over a bottom scrim so they stay legible against any
+              crop; the skill tags read as captions on the image itself. */}
+          <div className="relative rounded-[var(--radius-lg)] overflow-hidden aspect-[4/5] md:aspect-auto flex flex-col justify-end">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroImage}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover object-[30%_center] photo-mono"
             />
-            <div className="mt-auto pt-10 md:pt-8">
-              <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] mb-6">
-                KOLOS <span className="text-muted">Академия</span>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+            <div className="relative z-10 p-7 md:p-10">
+              <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-[-0.03em] leading-[0.9] text-on-inverse mb-4">
+                KOLOS <span className="text-on-inverse/55">Академия</span>
               </h1>
-              <p className="text-muted leading-relaxed max-w-md">{heroSubtitle}</p>
+              <p className="text-on-inverse/70 leading-relaxed max-w-md mb-6">{heroSubtitle}</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {HERO_SKILLS.map((s) => (
+                  <span key={s.lead} className="text-[11px] leading-none whitespace-nowrap">
+                    <span className="font-bold text-on-inverse">{s.lead}</span>{" "}
+                    <span className="text-on-inverse/55">{s.tail}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* The subject, centred over the seam — no card chrome around it
-              (no border/shadow/rounded box): the photo's own backdrop was
-              cut out to pure white in the source file, so it merges straight
-              into the panels instead of reading as a sticker on top of them.
-              Being opaque white, it also masks the black seam behind it, so
-              the divider stops at the subject instead of cutting through. */}
-          <div
-            className="hidden md:block absolute z-20 left-1/2 -translate-x-1/2"
-            style={{ top: `${HERO_PHOTO_TOP}rem`, width: `${HERO_PHOTO_W}rem` }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImage} alt="" className="w-full h-auto photo-mono-bright" />
-          </div>
-
-          {HERO_CALLOUTS.map((c) => (
-            <HeroCallout key={c.lead} {...c} />
-          ))}
         </div>
       </section>
 
